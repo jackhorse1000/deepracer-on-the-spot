@@ -349,7 +349,7 @@ class Reward:
         # Save first racingpoint of episode for later
         if self.verbose == True:
             self.first_racingpoint_index = 0 # this is just for testing purposes
-        if steps == 1:
+        if steps == 0:
             self.first_racingpoint_index = closest_index
 
         ################ REWARD AND PUNISHMENT ################
@@ -441,3 +441,44 @@ reward_object = Reward() # add parameter verbose=True to get noisy output for te
 
 def reward_function(params):
     return reward_object.reward_function(params)
+
+def get_test_params():
+    return {
+        'x': 0.7,
+        'y': 1.05,
+        'heading': 160.0,
+        'track_width': 0.45,
+        'is_reversed': False,
+        'steering_angle': 0.0,
+        'all_wheels_on_track': True,
+        'progress': 100.0,
+        'steps': 0,
+        'distance_from_center': 0.0,
+        'closest_waypoints': [0, 1, 2],
+        'is_left_of_center': False,
+        'speed': 1.0,
+        'is_offtrack' : False,
+        'waypoints': [
+            [0.75, -0.7],
+            [1.0, 0.0],
+            [0.7, 0.52],
+            [0.58, 0.7],
+            [0.48, 0.8],
+            [0.15, 0.95],
+            [-0.1, 1.0],
+            [-0.7, 0.75],
+            [-0.9, 0.25],
+            [-0.9, -0.55],
+        ]
+    }
+
+def test_reward():  
+    params = get_test_params()
+
+    reward = reward_function(params)
+
+    print("test_reward: {}".format(reward))
+
+    assert reward > 0.0
+
+# test_reward()
