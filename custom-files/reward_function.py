@@ -405,7 +405,7 @@ class Reward:
         ## Incentive for finishing the lap in less steps ##
         REWARD_FOR_FASTEST_TIME = 1500 # should be adapted to track length and other rewards
         STANDARD_TIME = 37  # seconds (time that is easily done by model)
-        FASTEST_TIME = 27  # seconds (best time of 1st place on the track)
+        FASTEST_TIME = 20  # seconds (best time of 1st place on the track)
         if progress == 100:
             finish_reward = max(1e-3, (-REWARD_FOR_FASTEST_TIME /
                       (15*(STANDARD_TIME-FASTEST_TIME)))*(steps-STANDARD_TIME*15))
@@ -441,7 +441,6 @@ reward_object = Reward() # add parameter verbose=True to get noisy output for te
 
 
 def reward_function(params):
-    print("Params : " , params)
     return reward_object.reward_function(params)
 
 def get_test_params():
