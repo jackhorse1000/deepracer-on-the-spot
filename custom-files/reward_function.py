@@ -414,8 +414,8 @@ class Reward:
         reward += finish_reward
         
         ## Zero reward if off track ##
-        if all_wheels_on_track == False:
-            reward = 1e-3
+        # if all_wheels_on_track == False:
+        #     reward = 1e-3
 
         ####################### VERBOSE #######################
         
