@@ -1,7 +1,7 @@
 import math
 
 class Reward:
-    def __init__(self, verbose=False):
+    def __init__(self, verbose=True):
         self.first_racingpoint_index = None
         self.verbose = verbose
 
@@ -349,8 +349,9 @@ class Reward:
         # Save first racingpoint of episode for later
         if self.verbose == True:
             self.first_racingpoint_index = 0 # this is just for testing purposes
-        if steps == 0:
+        if steps == 1:
             self.first_racingpoint_index = closest_index
+            print("first_racingpoint_index is set to: ", self.first_racingpoint_index)
 
         ################ REWARD AND PUNISHMENT ################
 
@@ -440,6 +441,7 @@ reward_object = Reward() # add parameter verbose=True to get noisy output for te
 
 
 def reward_function(params):
+    print("Params : " , params)
     return reward_object.reward_function(params)
 
 def get_test_params():
@@ -481,4 +483,4 @@ def test_reward():
 
     assert reward > 0.0
 
-# test_reward()
+test_reward()
