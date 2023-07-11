@@ -441,7 +441,6 @@ reward_object = Reward() # add parameter verbose=True to get noisy output for te
 
 
 def reward_function(params):
-    print("Params : " , params)
     return reward_object.reward_function(params)
 
 def get_test_params():
