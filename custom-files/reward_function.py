@@ -378,8 +378,8 @@ class Reward:
 
         # Reward if less steps
         REWARD_PER_STEP_FOR_FASTEST_TIME = 1 
-        STANDARD_TIME = 23
-        FASTEST_TIME = 17
+        STANDARD_TIME = 20
+        FASTEST_TIME = 16
         times_list = [row[3] for row in racing_track]
         projected_time = projected_time(self.first_racingpoint_index, closest_index, steps, times_list)
         try:
