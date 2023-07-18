@@ -9,16 +9,13 @@ def reward_function(params):
     steering = abs(params['steering_angle']) # Only need the absolute steering angle
 
     # Calculate 3 marks that are farther and father away from the center line
-    marker_1 = 0.1 * track_width
-    marker_2 = 0.25 * track_width
-    marker_3 = 0.5 * track_width
+    good_marker = 0.4 * track_width
+    wide_marker = 0.5 * track_width
 
     # Give higher reward if the car is closer to center line and vice versa
-    if distance_from_center <= marker_1:
+    if distance_from_center <= good_marker:
         reward = 1
-    elif distance_from_center <= marker_2:
-        reward = 0.5
-    elif distance_from_center <= marker_3:
+    elif distance_from_center <= wide_marker:
         reward = 0.1
     else:
         reward = 1e-3  # likely crashed/ close to off track
