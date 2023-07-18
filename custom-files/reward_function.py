@@ -427,7 +427,7 @@ class Reward:
             fastest_checkpoint_time = FASTEST_TIME* progress/100
             checkpoint_reward = max(MININAL_REWARD, (-fastest_checkpoint_reward /
                         (15*(standard_checkpoint_time-fastest_checkpoint_time)))*(steps-standard_checkpoint_time*15))
-            print(f"Checkpoint: {progress}. reward = {checkpoint_reward}")
+            print("Checkpoint: %f. reward = %f" % (progress, checkpoint_reward))
         reward += checkpoint_reward
         
         ## Zero reward if off track ##
