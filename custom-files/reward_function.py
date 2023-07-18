@@ -1,5 +1,7 @@
 import math
 
+MININAL_REWARD = 1e-3
+
 class Reward:
     def __init__(self, verbose=True):
         self.first_racingpoint_index = None
@@ -361,7 +363,7 @@ class Reward:
         ## Reward if car goes close to optimal racing line ##
         DISTANCE_MULTIPLE = 1
         dist = dist_to_racing_line(optimals[0:2], optimals_second[0:2], [x, y])
-        distance_reward = max(1e-3, 1 - (dist/(track_width*0.5)))
+        distance_reward = max(MININAL_REWARD, 1 - (dist/(track_width*0.5)))
         reward += distance_reward * DISTANCE_MULTIPLE
 
         ## Reward if speed is close to optimal speed ##
@@ -384,7 +386,7 @@ class Reward:
         projected_time = projected_time(self.first_racingpoint_index, closest_index, steps, times_list)
         try:
             steps_prediction = projected_time * 15 + 1
-            reward_prediction = max(1e-3, (-REWARD_PER_STEP_FOR_FASTEST_TIME*(FASTEST_TIME) /
+            reward_prediction = max(MININAL_REWARD, (-REWARD_PER_STEP_FOR_FASTEST_TIME*(FASTEST_TIME) /
                                            (STANDARD_TIME-FASTEST_TIME))*(steps_prediction-(STANDARD_TIME*15+1)))
             steps_reward = min(REWARD_PER_STEP_FOR_FASTEST_TIME, reward_prediction / steps_prediction)
         except:
@@ -395,27 +397,41 @@ class Reward:
         direction_diff = racing_direction_diff(
             optimals[0:2], optimals_second[0:2], [x, y], heading)
         if direction_diff > 30:
-            reward = 1e-3
+            reward = MININAL_REWARD
             
         # Zero reward of obviously too slow
         speed_diff_zero = optimals[2]-speed
         if speed_diff_zero > 0.5:
-            reward = 1e-3
+            reward = MININAL_REWARD
             
         ## Incentive for finishing the lap in less steps ##
         REWARD_FOR_FASTEST_TIME = 1500 # should be adapted to track length and other rewards
         STANDARD_TIME = 20  # seconds (time that is easily done by model)
         FASTEST_TIME = 16  # seconds (best time of 1st place on the track)
         if progress == 100:
-            finish_reward = max(1e-3, (-REWARD_FOR_FASTEST_TIME /
+            finish_reward = max(MININAL_REWARD, (-REWARD_FOR_FASTEST_TIME /
                       (15*(STANDARD_TIME-FASTEST_TIME)))*(steps-STANDARD_TIME*15))
         else:
             finish_reward = 0
         reward += finish_reward
+
+        ## Incentive for completing checkpoints quickly ##
+        NUM_CHECKPOINTS = 15
+        
+        DECIMAL_PLACES = 1
+        checkpoints =  [round(checkpoint_step, DECIMAL_PLACES) for checkpoint_step in np.linspace(0, 100, NUM_CHECKPOINTS)][1:-1]
+        if round(progress, DECIMAL_PLACES) in checkpoints:
+            fastest_checkpoint_reward = REWARD_FOR_FASTEST_TIME/NUM_CHECKPOINTS
+            standard_checkpoint_time = STANDARD_TIME * progress/100
+            fastest_checkpoint_time = FASTEST_TIME* progress/100
+            checkpoint_reward = max(MININAL_REWARD, (-fastest_checkpoint_reward /
+                        (15*(standard_checkpoint_time-fastest_checkpoint_time)))*(steps-standard_checkpoint_time*15))
+            print(f"Checkpoint: {progress}. reward = {checkpoint_reward}")
+        reward += checkpoint_reward
         
         ## Zero reward if off track ##
         if all_wheels_on_track == False:
-            reward = 1e-3
+            reward = MININAL_REWARD
 
         ####################### VERBOSE #######################
         
