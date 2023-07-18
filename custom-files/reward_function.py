@@ -1,4 +1,5 @@
 import math
+import numpy as np
 
 MININAL_REWARD = 1e-3
 
@@ -468,7 +469,7 @@ def get_test_params():
         'is_reversed': False,
         'steering_angle': 0.0,
         'all_wheels_on_track': True,
-        'progress': 100.0,
+        'progress': 7.1,
         'steps': 0,
         'distance_from_center': 0.0,
         'closest_waypoints': [0, 1, 2],
