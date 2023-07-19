@@ -428,7 +428,7 @@ class Reward:
             checkpoint_reward = max(MININAL_REWARD, (-fastest_checkpoint_reward /
                         (15*(standard_checkpoint_time-fastest_checkpoint_time)))*(steps-standard_checkpoint_time*15))
             print("Checkpoint: %f. reward = %f" % (progress, checkpoint_reward))
-        reward += checkpoint_reward
+            reward += checkpoint_reward
         
         ## Zero reward if off track ##
         if all_wheels_on_track == False:
