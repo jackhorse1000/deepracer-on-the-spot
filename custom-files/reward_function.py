@@ -369,7 +369,7 @@ class Reward:
 
         ## Reward if speed is close to optimal speed ##
         SPEED_DIFF_NO_REWARD = 1
-        SPEED_MULTIPLE = 2
+        SPEED_MULTIPLE = 6
         speed_diff = abs(optimals[2]-speed)
         if speed_diff <= SPEED_DIFF_NO_REWARD:
             # we use quadratic punishment (not linear) bc we're not as confident with the optimal speed
