@@ -357,10 +357,10 @@ class Reward:
         ################ REWARD AND PUNISHMENT ################
 
         ## Define the default reward ##
-        reward = 1
+        reward = 10
 
         ## Reward if car goes close to optimal racing line ##
-        DISTANCE_MULTIPLE = 1
+        DISTANCE_MULTIPLE = 10
         dist = dist_to_racing_line(optimals[0:2], optimals_second[0:2], [x, y])
         distance_reward = max(1e-3, 1 - (dist / (track_width * 0.5)))
         reward += distance_reward * DISTANCE_MULTIPLE
@@ -385,8 +385,8 @@ class Reward:
         projected_time = projected_time(self.first_racingpoint_index, closest_index, steps, times_list)
         try:
             steps_prediction = projected_time * 15 + 1
-            reward_prediction = max(1e-3, (-REWARD_PER_STEP_FOR_FASTEST_TIME * (FASTEST_TIME) /
-                                           (STANDARD_TIME - FASTEST_TIME)) * (
+            # (16 / 4) x (predicted steps - 21)
+            reward_prediction = max(1e-3, (-REWARD_PER_STEP_FOR_FASTEST_TIME * (FASTEST_TIME) / (STANDARD_TIME - FASTEST_TIME)) * (
                                                 steps_prediction - (STANDARD_TIME * 15 + 1)))
             steps_reward = min(REWARD_PER_STEP_FOR_FASTEST_TIME, reward_prediction / steps_prediction)
         except:
