@@ -413,7 +413,7 @@ class Reward:
                                        (15 * (STANDARD_TIME - FASTEST_TIME))) * (steps - STANDARD_TIME * 15))
         else:
             finish_reward = 1e-3
-        reward += finish_reward
+        # reward += finish_reward
 
         ## Zero reward if off track ##
         if all_wheels_on_track == False:
@@ -422,9 +422,9 @@ class Reward:
         ####################### VERBOSE #######################
 
         if self.verbose == True:
-            print("Closest index: %i" % closest_index)
+            # print("Closest index: %i" % closest_index)
             print("Distance to racing line: %f" % dist)
-            print("=== Distance reward (w/out multiple): %f ===" % (distance_reward))  ## distance multiple = 1
+            print("=== Distance reward (w/out multiple): %f ===" % distance_reward*DISTANCE_MULTIPLE)  ## distance multiple = 1
             print("Optimal speed: %f" % optimals[2])
             print("Speed difference: %f" % speed_diff)
             print("=== Speed reward (w/out multiple): %f ===" % speed_reward)  ## speed multiple = 2
