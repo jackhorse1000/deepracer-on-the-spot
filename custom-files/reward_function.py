@@ -362,14 +362,14 @@ class Reward:
         reward = 1
 
         ## Reward if car goes close to optimal racing line ##
-        DISTANCE_MULTIPLE = 4
+        DISTANCE_MULTIPLE = 2
         dist = dist_to_racing_line(optimals[0:2], optimals_second[0:2], [x, y])
         distance_reward = max(MININAL_REWARD, 1 - (dist/(track_width*0.5)))
         reward += distance_reward * DISTANCE_MULTIPLE
 
         ## Reward if speed is close to optimal speed ##
         SPEED_DIFF_NO_REWARD = 1
-        SPEED_MULTIPLE = 6
+        SPEED_MULTIPLE = 4
         speed_diff = abs(optimals[2]-speed)
         if speed_diff <= SPEED_DIFF_NO_REWARD:
             # we use quadratic punishment (not linear) bc we're not as confident with the optimal speed
@@ -392,7 +392,7 @@ class Reward:
             steps_reward = min(REWARD_PER_STEP_FOR_FASTEST_TIME, reward_prediction / steps_prediction)
         except:
             steps_reward = MININAL_REWARD
-        # reward += steps_reward
+        reward += steps_reward
 
         # Zero reward if obviously wrong direction (e.g. spin)
         direction_diff = racing_direction_diff(
@@ -401,10 +401,9 @@ class Reward:
             reward = MININAL_REWARD
             
         # Zero reward of obviously too slow. 
-        # TODO: Uncomment when we consistently get around the track
-        # speed_diff_zero = optimals[2]-speed
-        # if speed_diff_zero > 0.5:
-        #     reward = MININAL_REWARD
+        speed_diff_zero = optimals[2]-speed
+        if speed_diff_zero > 0.5:
+            reward = MININAL_REWARD
             
         ## Incentive for finishing the lap in less steps ##
         REWARD_FOR_FASTEST_TIME = 1500 # should be adapted to track length and other rewards
@@ -499,4 +498,4 @@ def test_reward():
 
     assert reward > 0.0
 
-test_reward()
+# test_reward()
