@@ -400,10 +400,10 @@ class Reward:
         if direction_diff > 30:
             reward = MININAL_REWARD
             
-        # Zero reward of obviously too slow. 
-        speed_diff_zero = optimals[2]-speed
-        if speed_diff_zero > 0.5:
-            reward = MININAL_REWARD
+        # # Zero reward of obviously too slow. 
+        # speed_diff_zero = optimals[2]-speed
+        # if speed_diff_zero > 0.5:
+        #     reward = MININAL_REWARD
             
         ## Incentive for finishing the lap in less steps ##
         REWARD_FOR_FASTEST_TIME = 1500 # should be adapted to track length and other rewards
@@ -436,14 +436,11 @@ class Reward:
         ####################### VERBOSE #######################
         
         if self.verbose == True:
-            print("Closest index: %i" % closest_index)
             print("Distance to racing line: %f" % dist)
             print("=== Distance reward (w/out multiple): %f ===" % (distance_reward))
             print("Optimal speed: %f" % optimals[2])
             print("Speed difference: %f" % speed_diff)
             print("=== Speed reward (w/out multiple): %f ===" % speed_reward)
-            print("Direction difference: %f" % direction_diff)
-            print("Predicted time: %f" % projected_time)
             print("=== Steps reward: %f ===" % steps_reward)
             print("=== Finish reward: %f ===" % finish_reward)
             
