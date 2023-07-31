@@ -359,12 +359,12 @@ class Reward:
         ################ REWARD AND PUNISHMENT ################
 
         ## Define the default reward ##
-        reward = 1
+        reward = 10
 
         ## Reward if car goes close to optimal racing line ##
-        DISTANCE_MULTIPLE = 2
+        DISTANCE_MULTIPLE = 10
         dist = dist_to_racing_line(optimals[0:2], optimals_second[0:2], [x, y])
-        distance_reward = max(MININAL_REWARD, 1 - (dist/(track_width*0.5)))
+        distance_reward = max(MININAL_REWARD, 1 - (dist/(track_width*0.4)))
         reward += distance_reward * DISTANCE_MULTIPLE
 
         ## Reward if speed is close to optimal speed ##
@@ -392,7 +392,7 @@ class Reward:
             steps_reward = min(REWARD_PER_STEP_FOR_FASTEST_TIME, reward_prediction / steps_prediction)
         except:
             steps_reward = MININAL_REWARD
-        reward += steps_reward
+        # reward += steps_reward
 
         # Zero reward if obviously wrong direction (e.g. spin)
         direction_diff = racing_direction_diff(
@@ -412,7 +412,7 @@ class Reward:
                       (15*(STANDARD_TIME-FASTEST_TIME)))*(steps-STANDARD_TIME*15))
         else:
             finish_reward = 0
-        reward += finish_reward
+        # reward += finish_reward
 
         # TODO: Update checkpoints to make use of previous step's states and use when we get around the track consistently
         ## Incentive for completing checkpoints quickly ##
@@ -441,8 +441,8 @@ class Reward:
             print("Optimal speed: %f" % optimals[2])
             print("Speed difference: %f" % speed_diff)
             print("=== Speed reward (w/out multiple): %f ===" % speed_reward)
-            print("=== Steps reward: %f ===" % steps_reward)
-            print("=== Finish reward: %f ===" % finish_reward)
+            # print("=== Steps reward: %f ===" % steps_reward)
+            # print("=== Finish reward: %f ===" % finish_reward)
             
         #################### RETURN REWARD ####################
         
