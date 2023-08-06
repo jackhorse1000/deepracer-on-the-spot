@@ -369,8 +369,8 @@ class Reward:
         optimals_second = racing_track[second_closest_index]
 
         # Save first racingpoint of episode for later
-        if self.verbose == True:
-            self.first_racingpoint_index = 0 # this is just for testing purposes
+        # if self.verbose == True:
+        #     self.first_racingpoint_index = 0 # this is just for testing purposes
         if steps == 1:
             self.first_racingpoint_index = closest_index
         print("first_racingpoint_index is set to: ", self.first_racingpoint_index)
@@ -384,7 +384,7 @@ class Reward:
         DISTANCE_MULTIPLE = 1
         dist = dist_to_racing_line(optimals[0:2], optimals_second[0:2], [x, y])
         distance_reward = max(1e-3, 1 - (dist/(track_width*0.5)))
-        reward += distance_reward * DISTANCE_MULTIPLE
+        # reward += distance_reward * DISTANCE_MULTIPLE
 
         ## Reward if speed is close to optimal speed ##
         SPEED_DIFF_NO_REWARD = 1
@@ -396,11 +396,11 @@ class Reward:
             speed_reward = (1 - (speed_diff/(SPEED_DIFF_NO_REWARD))**2)**2
         else:
             speed_reward = 0
-        reward += speed_reward * SPEED_MULTIPLE
+        # reward += speed_reward * SPEED_MULTIPLE
 
         # Reward if less steps
-        REWARD_PER_STEP_FOR_FASTEST_TIME = 1 
-        STANDARD_TIME = 18
+        REWARD_PER_STEP_FOR_FASTEST_TIME = 10 
+        STANDARD_TIME = 20
         FASTEST_TIME = 15
         times_list = [row[3] for row in racing_track]
         projected_time = projected_time(self.first_racingpoint_index, closest_index, steps, times_list)
@@ -411,13 +411,23 @@ class Reward:
             steps_reward = min(REWARD_PER_STEP_FOR_FASTEST_TIME, reward_prediction / steps_prediction)
         except:
             steps_reward = 0
-        reward += steps_reward
+        # reward += steps_reward
 
-        reward = 10 * ((distance_reward + speed_reward) ** 2) * steps_reward
+
+        progress_reward = 10 * progress / steps
+        if steps <= 5:
+            progress_reward = 1 #ignore progress in the first 5 steps
+
+
 
         # Zero reward if obviously wrong direction (e.g. spin)
         direction_diff = racing_direction_diff(
             optimals[0:2], optimals_second[0:2], [x, y], heading)
+        
+        direction_diff_reward = 10 * math.cos(direction_diff * math.pi / 60)
+        
+        reward = 10 * ((distance_reward + speed_reward) ** 2) + steps_reward + progress_reward + direction_diff_reward
+        
         if direction_diff > 30:
             reward = 1e-3
             
@@ -450,14 +460,12 @@ class Reward:
         ####################### VERBOSE #######################
         if self.verbose == True:
             print("Closest index: %i" % closest_index)
-            print("Distance to racing line: %f" % dist)
-            print("=== Distance reward (w/out multiple): %f ===" % (distance_reward))
+            print("Distance to racing line: %f, reward =  %f" % (dist, distance_reward))
             print("Optimal speed: %f" % optimals[2])
-            print("Speed difference: %f" % speed_diff)
-            print("=== Speed reward (w/out multiple): %f ===" % speed_reward)
-            print("Direction difference: %f" % direction_diff)
+            print("Speed difference: %f, reward = %f" % (speed_diff, speed_reward))
+            print("Direction difference: %f, reward = %f" % (direction_diff, direction_diff_reward))
             print("Predicted time: %f" % projected_time)
-            print("=== Steps reward: %f ===" % steps_reward)
+            print("=== Steps reward =  %f, progress reward =  %f" % (steps_reward, progress_reward))
             print("=== Finish reward: %f ===" % finish_reward)
             
         #################### RETURN REWARD ####################
@@ -482,7 +490,7 @@ def get_test_params():
         'steering_angle': 0.0,
         'all_wheels_on_track': True,
         'progress': 100.0,
-        'steps': 0,
+        'steps': 1,
         'distance_from_center': 0.0,
         'closest_waypoints': [0, 1, 2],
         'is_left_of_center': False,
