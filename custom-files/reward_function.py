@@ -349,6 +349,16 @@ class Reward:
 
         ############### OPTIMAL X,Y,SPEED,TIME ################
 
+        # Reinitialize previous parameters if it is a new episode
+        if PARAMS.prev_steps is None or steps < PARAMS.prev_steps:
+            PARAMS.prev_speed = None
+            PARAMS.prev_steering_angle = None
+            PARAMS.prev_direction_diff = None
+        
+        has_speed_dropped = False
+        if PARAMS.prev_speed is not None:
+            if PARAMS.prev_speed > speed:
+                has_speed_dropped = True
 
 
         # Get closest indexes for racing line (and distances to all points on racing line)
@@ -390,8 +400,8 @@ class Reward:
 
         # Reward if less steps
         REWARD_PER_STEP_FOR_FASTEST_TIME = 1 
-        STANDARD_TIME = 20
-        FASTEST_TIME = 16
+        STANDARD_TIME = 18
+        FASTEST_TIME = 15
         times_list = [row[3] for row in racing_track]
         projected_time = projected_time(self.first_racingpoint_index, closest_index, steps, times_list)
         try:
@@ -403,6 +413,8 @@ class Reward:
             steps_reward = 0
         reward += steps_reward
 
+        reward = 10 * ((distance_reward + speed_reward) ** 2) * steps_reward
+
         # Zero reward if obviously wrong direction (e.g. spin)
         direction_diff = racing_direction_diff(
             optimals[0:2], optimals_second[0:2], [x, y], heading)
@@ -410,13 +422,13 @@ class Reward:
             reward = 1e-3
             
         # Zero reward of obviously too slow
-        speed_diff_zero = optimals[2]-speed
-        if speed_diff_zero > 0.5:
-            reward = 1e-3
+        # speed_diff_zero = optimals[2]-speed
+        # if speed_diff_zero > 0.5:
+        #     reward = 1e-3
             
         ## Incentive for finishing the lap in less steps ##
         REWARD_FOR_FASTEST_TIME = 1500 # should be adapted to track length and other rewards
-        STANDARD_TIME = 18  # seconds (time that is easily done by model)
+        STANDARD_TIME = 20  # seconds (time that is easily done by model)
         FASTEST_TIME = 15 # seconds (best time of 1st place on the track)
         if progress == 100:
             finish_reward = max(1e-3, (-REWARD_FOR_FASTEST_TIME /
@@ -429,8 +441,13 @@ class Reward:
         if all_wheels_on_track == False:
             reward = 1e-3
 
+        # Before returning reward, update the variables
+        PARAMS.prev_speed = speed
+        PARAMS.prev_steering_angle = steering_angle
+        PARAMS.prev_direction_diff = direction_diff
+        PARAMS.prev_steps = steps
+
         ####################### VERBOSE #######################
-        
         if self.verbose == True:
             print("Closest index: %i" % closest_index)
             print("Distance to racing line: %f" % dist)
