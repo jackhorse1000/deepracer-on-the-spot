@@ -371,7 +371,8 @@ class Reward:
         # Save first racingpoint of episode for later
         # if self.verbose == True:
         #     self.first_racingpoint_index = 0 # this is just for testing purposes
-        if steps == 1:
+        if self.first_racingpoint_index is None:
+            print("At step %f Setting first_racingpoint_index" % steps)
             self.first_racingpoint_index = closest_index
         print("first_racingpoint_index is set to: ", self.first_racingpoint_index)
 
