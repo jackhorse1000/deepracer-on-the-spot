@@ -425,11 +425,11 @@ class Reward:
         direction_diff = racing_direction_diff(
             optimals[0:2], optimals_second[0:2], [x, y], heading)
         
-        direction_diff_reward = 10 * math.cos(direction_diff * math.pi / 60)
+        direction_diff_reward = 10 * abs(math.cos(direction_diff * math.pi / 20))
         
-        reward = 10 * ((distance_reward + speed_reward) ** 2) + steps_reward + progress_reward + direction_diff_reward
+        reward = 10 * ((distance_reward + speed_reward) ** 2) + progress_reward + direction_diff_reward
         
-        if direction_diff > 30:
+        if direction_diff > 20:
             reward = 1e-3
             
         # Zero reward of obviously too slow
