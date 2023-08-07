@@ -1,46 +1,46 @@
 {
     "action_space": [
-      {
-          "steering_angle": -30.0,
-          "speed": 2.0
-      },
-      {
-          "steering_angle": -3.374,
-          "speed": 2.7635
-      },
-      {
-          "steering_angle": -2.5265,
-          "speed": 2.0399
-      },
-      {
-          "steering_angle": 0.5204,
-          "speed": 3.964
-      },
-      {
-          "steering_angle": 1.4485,
-          "speed": 3.4682
-      },
-      {
-          "steering_angle": 1.9424,
-          "speed": 2.4171
-      },
-      {
-          "steering_angle": 2.3215,
-          "speed": 3.107
-      },
-      {
-          "steering_angle": 11.5964,
-          "speed": 2.0512
-      },
-      {
-          "steering_angle": 12.5006,
-          "speed": 2.7545
-      },
-      {
-          "steering_angle": 30.0,
-          "speed": 2.0
-      }
-  ],
+        {
+            "steering_angle": -30.0,
+            "speed": 2.0
+        },
+        {
+            "steering_angle": -7.35,
+            "speed": 2.6073
+        },
+        {
+            "steering_angle": -5.7869,
+            "speed": 3.5727
+        },
+        {
+            "steering_angle": -2.1871,
+            "speed": 3.1132
+        },
+        {
+            "steering_angle": 1.127,
+            "speed": 3.9415
+        },
+        {
+            "steering_angle": 3.9869,
+            "speed": 2.0759
+        },
+        {
+            "steering_angle": 6.3786,
+            "speed": 2.4901
+        },
+        {
+            "steering_angle": 8.5137,
+            "speed": 3.3911
+        },
+        {
+            "steering_angle": 8.6931,
+            "speed": 2.8236
+        },
+        {
+            "steering_angle": 30.0,
+            "speed": 2.0
+        }
+    ],
     "sensor": ["FRONT_FACING_CAMERA"],
     "neural_network": "DEEP_CONVOLUTIONAL_NETWORK_SHALLOW",
     "training_algorithm": "clipped_ppo", 
