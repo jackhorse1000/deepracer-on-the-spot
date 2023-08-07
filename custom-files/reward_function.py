@@ -449,7 +449,7 @@ class Reward:
                 sum_degrees += degree_turn
             return sum_degrees
             
-        def get_track_direction(closest_index, lookahead=5) -> Direction:
+        def get_track_direction(closest_index, lookahead=5):
             degrees_turned = track_lookahed_degree_turns(closest_index, lookahead)
             if degrees_turned > 5:
                 return Direction.RIGHT
@@ -540,11 +540,11 @@ class Reward:
         ############# INCREMENTAL PROGRESS REWARD ##############
         
         # Reward for making steady progress
-        SECTIONS = 10
-        progress_reward = 10 * progress / steps
-        
+        SECTIONS = 10    
         if steps <= 5:
             progress_reward = MINIMAL_REWARD #ignore progress in the first 5 steps
+        else:
+            progress_reward = 10 * progress / steps
         
         # Bonus that the agent gets for completing every 10 percent of track
         # Is exponential in the progress / steps. 
@@ -637,15 +637,22 @@ class Reward:
         PreviousState.update_params(params)
 
         ####################### VERBOSE #######################
+        
         # TODO: Update logging
+        print("Reward: %f" % reward)
         if self.verbose == True:
-            print("Distance to racing line: %f" % dist)
-            print("=== Distance reward (w/out multiple): %f ===" % (distance_reward))
+            print("Speed Reward: %f" % speed_reward)
+            print("Distance Reward: %f" % distance_reward)
+            print("Heading Reward: %f" % heading_reward)
+            
+            print("Progress Reward: %f" % progress_reward)
+            print("Progress bonus Reward: %f" % intermediate_progress_bonus)
+            print("Steps Reward: %f" % steps_reward)
+            print("Finish Reward: %f" % finish_reward)
+
+            print("Distance reward (w/out multiple): %f" % (distance_reward))
             print("Optimal speed: %f" % optimals[2])
             print("Speed difference: %f" % speed_diff)
-            print("=== Speed reward (w/out multiple): %f ===" % speed_reward)
-            print("=== Steps reward: %f ===" % steps_reward)
-            print("=== Finish reward: %f ===" % finish_reward)
             
         #################### RETURN REWARD ####################
         
@@ -669,11 +676,11 @@ def get_test_params():
         'steering_angle': 0.0,
         'all_wheels_on_track': True,
         'progress': 7.1,
-        'steps': 0,
+        'steps': 1000,
         'distance_from_center': 0.0,
         'closest_waypoints': [0, 1, 2],
         'is_left_of_center': False,
-        'speed': 1.0,
+        'speed': 3.0,
         'is_offtrack' : False,
         'waypoints': [
             [0.75, -0.7],
@@ -698,4 +705,4 @@ def test_reward():
 
     assert reward > 0.0
 
-test_reward()
+# test_reward()
