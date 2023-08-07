@@ -705,4 +705,4 @@ def test_reward():
 
     assert reward > 0.0
 
-test_reward()
+# test_reward()
