@@ -627,7 +627,7 @@ class Reward:
 
         ## Zero reward if off track ##
         if not all_wheels_on_track:
-            print("Unforgivable action all_wheels_on_track = %b" % all_wheels_on_track)
+            print("Unforgivable action all_wheels_on_track = %s" % all_wheels_on_track)
             unforgivable_action = True
         
         if unforgivable_action:
@@ -674,7 +674,7 @@ def get_test_params():
         'track_width': 0.45,
         'is_reversed': False,
         'steering_angle': 0.0,
-        'all_wheels_on_track': True,
+        'all_wheels_on_track': False,
         'progress': 7.1,
         'steps': 1000,
         'distance_from_center': 0.0,
@@ -705,4 +705,4 @@ def test_reward():
 
     assert reward > 0.0
 
-# test_reward()
+test_reward()
