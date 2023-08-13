@@ -427,11 +427,12 @@ class Reward:
         optimals_second = TrackInfo.racing_track[second_closest_index]
 
         # Save first racingpoint of episode for later
-        if self.verbose == True:
-            self.first_racingpoint_index = 0 # this is just for testing purposes
         if steps == 1:
             self.first_racingpoint_index = closest_index
             print("first_racingpoint_index is set to: ", self.first_racingpoint_index)
+        elif self.first_racingpoint_index is None:
+            self.first_racingpoint_index = 0
+
             
         ############### HELPER VARIABLES ################
 
@@ -544,20 +545,20 @@ class Reward:
         if steps <= 5:
             progress_reward = MINIMAL_REWARD #ignore progress in the first 5 steps
         else:
-            progress_reward = 10 * progress / steps
+            progress_reward = max(MINIMAL_REWARD, 10 * progress / steps)
         
         # Bonus that the agent gets for completing every 10 percent of track
         # Is exponential in the progress / steps. 
         # exponent increases with an increase in fraction of lap completed
         
-        intermediate_progress_bonus = 0
+        intermediate_progress_bonus = 0.0
         pi = int(progress//SECTIONS)
         
         if GlobalParams.progress_reward_list is None:
             GlobalParams.progress_reward_list = [0] * SECTIONS
         
         if pi != 0 and GlobalParams.progress_reward_list[pi] == 0:
-            if pi == 10: # 100% track completion
+            if pi == int(100//SECTIONS): # 100% track completion
                 intermediate_progress_bonus = progress_reward ** 14
             else:
                 intermediate_progress_bonus = progress_reward ** (5 + 0.75 * pi)
@@ -646,7 +647,7 @@ class Reward:
             print("Heading Reward: %f" % heading_reward)
             
             print("Progress Reward: %f" % progress_reward)
-            print("Progress bonus Reward: %f" % intermediate_progress_bonus)
+            print("Progress bonus Reward:", intermediate_progress_bonus)
             print("Steps Reward: %f" % steps_reward)
             print("Finish Reward: %f" % finish_reward)
 
@@ -675,7 +676,7 @@ def get_test_params():
         'is_reversed': False,
         'steering_angle': 0.0,
         'all_wheels_on_track': False,
-        'progress': 7.1,
+        'progress': 10,
         'steps': 1000,
         'distance_from_center': 0.0,
         'closest_waypoints': [0, 1, 2],
