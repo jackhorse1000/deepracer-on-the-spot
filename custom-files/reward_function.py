@@ -562,7 +562,7 @@ class Reward:
                 intermediate_progress_bonus = progress_reward ** 14
             else:
                 intermediate_progress_bonus = progress_reward ** (5 + 0.75 * pi)
-        GlobalParams.progress_reward_list[pi] = intermediate_progress_bonus
+            GlobalParams.progress_reward_list[pi] = intermediate_progress_bonus
 
         
         ################ LESS STEPS REWARD ################
@@ -627,7 +627,7 @@ class Reward:
             unforgivable_action = True
 
         ## Zero reward if off track ##
-        if not all_wheels_on_track:
+        if all_wheels_on_track == False:
             print("Unforgivable action all_wheels_on_track = %s" % all_wheels_on_track)
             unforgivable_action = True
         
