@@ -639,7 +639,7 @@ class Reward:
             
         if GlobalParams.prev_direction_diff is not None and \
             abs(direction_diff) > 30 and (abs(direction_diff) > abs(GlobalParams.prev_direction_diff)):
-                print(f"!!! FAR AWAY FROM DIRECTION AND GETTING WORST: %f %f" % direction_diff, GlobalParams.prev_direction_diff)
+                print("FAR AWAY FROM DIRECTION AND GETTING WORST: %f %f" % direction_diff, GlobalParams.prev_direction_diff)
                 unforgivable_action = True
         
         if unforgivable_action:
