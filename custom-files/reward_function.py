@@ -238,6 +238,7 @@ class TrackInfo:
 
 class GlobalParams:
     progress_reward_list = None
+    prev_direction_diff = None
     
     @classmethod
     def reset(cls):
@@ -427,11 +428,9 @@ class Reward:
         optimals_second = TrackInfo.racing_track[second_closest_index]
 
         # Save first racingpoint of episode for later
-        if steps == 1:
+        if self.first_racingpoint_index is None:
             self.first_racingpoint_index = closest_index
             print("first_racingpoint_index is set to: ", self.first_racingpoint_index)
-        elif self.first_racingpoint_index is None:
-            self.first_racingpoint_index = 0
 
             
         ############### HELPER VARIABLES ################
@@ -617,6 +616,13 @@ class Reward:
             unforgivable_action = True
         # TODO: The car is currently heading in the right direction but takes a steering action that causes it to point off-course.
         # TODO: The car turns to the left when it should be taking a right turn.
+        if get_track_direction(closest_index) == Direction.RIGHT and steering_angle < -5:
+            print("Unforgivable action. Track goes Right. Action is Light.")
+            unforgivable_action = True
+
+        if get_track_direction(closest_index) == Direction.LEFT and steering_angle < -5:
+            print("Unforgivable action. Track goes Left. Action is Right.")
+            unforgivable_action = True
         # TODO: The car turns to the right when it should be taking a left turn.
         # TODO: The car’s speed is at least 1 m/s greater than its optimal speed while it is making a turn. Essentially the car is turning too fast.
         
@@ -630,6 +636,11 @@ class Reward:
         if all_wheels_on_track == False:
             print("Unforgivable action all_wheels_on_track = %s" % all_wheels_on_track)
             unforgivable_action = True
+            
+        if GlobalParams.prev_direction_diff is not None and \
+            abs(direction_diff) > 30 and (abs(direction_diff) > abs(GlobalParams.prev_direction_diff)):
+                print(f"!!! FAR AWAY FROM DIRECTION AND GETTING WORST: %f %f" % direction_diff, GlobalParams.prev_direction_diff)
+                unforgivable_action = True
         
         if unforgivable_action:
             reward = MINIMAL_REWARD
@@ -706,4 +717,4 @@ def test_reward():
 
     assert reward > 0.0
 
-# test_reward()
+test_reward()
