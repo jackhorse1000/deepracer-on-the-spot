@@ -627,12 +627,12 @@ class Reward:
         #     unforgivable_action = True
 
         # TODO: The car turns to the right when it should be taking a left turn.
-        if direction_to_align_with_track == Direction.RIGHT and steering_angle < -2:
-            print("Unforgivable action. Should turn right. Action is left. %f angle diff", racing_direction_diff)
+        if direction_to_align_with_track == Direction.RIGHT and not (steering_angle < 2):
+            print("Unforgivable action. Should turn right. Action is left. %f angle diff, %f steering angle", racing_direction_diff, steering_angle)
             unforgivable_action = True
 
-        if direction_to_align_with_track == Direction.LEFT and steering_angle > 2:
-            print("Unforgivable action. Should turn left. Action is right. %f angle diff", racing_direction_diff)
+        if direction_to_align_with_track == Direction.LEFT and not (steering_angle > -2):
+            print("Unforgivable action. Should turn left. Action is right. %f angle diff, %f steering angle", racing_direction_diff, steering_angle)
             unforgivable_action = True
 
         # TODO: The car’s speed is at least 1 m/s greater than its optimal speed while it is making a turn. Essentially the car is turning too fast.
@@ -731,4 +731,4 @@ def test_reward():
     assert reward > 0.0
 
 
-test_reward()
+# test_reward()
