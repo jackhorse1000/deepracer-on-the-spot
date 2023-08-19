@@ -360,6 +360,8 @@ class Reward:
                 raw_direction_diff += 360
 
             direction = Direction.RIGHT if raw_direction_diff > 0 else Direction.LEFT
+            if -2 > raw_direction_diff > 2:
+                direction = Direction.STRAIGHT
             direction_diff = abs(raw_direction_diff)
 
             return direction_diff, direction
