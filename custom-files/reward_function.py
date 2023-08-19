@@ -434,20 +434,29 @@ class Reward:
 
             
         ############### HELPER VARIABLES ################
+        
+        def angle_between_vectors(u, v):
+            dot_product = u[0] * v[0] + u[1] * v[1]
+            determinant = u[0] * v[1] - u[1] * v[0]
+            return math.degrees(math.atan2(determinant, dot_product))
 
         # TODO: Determine if straight, right or left turn
+        # Figure out if car is heading straight, left or right
         def track_lookahed_degree_turns(closest_index, lookahead=5):
-            sum_degrees = 0
-            for i in range(1, lookahead):
-                current_index = ((closest_index + i) - 1) % len(TrackInfo.racing_track)
-                next_index = (current_index + 1) % len(TrackInfo.racing_track)
-                
+            coords = []
+            for i in range(0, lookahead):
+                current_index = (closest_index + i) % len(TrackInfo.racing_track)
                 current_point = TrackInfo.racing_track[current_index]
-                next_point = TrackInfo.racing_track[next_index]
-                
-                degree_turn = math.degrees(math.atan2(next_point[1] - current_point[0], next_point[0] - current_point[1]))
-                sum_degrees += degree_turn
-            return sum_degrees
+                coords.append([current_point[0], current_point[1]])
+            vectors = [(coords[i+1][0] - coords[i][0], coords[i+1][1] - coords[i][1]) for i in range(len(coords) - 1)]
+            
+            angles = [angle_between_vectors(vectors[i], vectors[i+1]) for i in range(len(vectors) - 1)]
+            print(angles)
+            
+            total_angle = sum(angles)
+            print(total_angle)
+            
+            return total_angle
             
         def get_track_direction(closest_index, lookahead=5):
             degrees_turned = track_lookahed_degree_turns(closest_index, lookahead)
@@ -680,15 +689,15 @@ def reward_function(params):
 
 def get_test_params():
     return {
-        'x': 0.7,
-        'y': 1.05,
+        'x': 2.1124,
+        'y': 0.5105,
         'heading': 160.0,
         'track_width': 0.45,
         'is_reversed': False,
         'steering_angle': 0.0,
         'all_wheels_on_track': False,
-        'progress': 10,
-        'steps': 1000,
+        'progress': 0,
+        'steps': 0,
         'distance_from_center': 0.0,
         'closest_waypoints': [0, 1, 2],
         'is_left_of_center': False,
