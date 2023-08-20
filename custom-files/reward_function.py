@@ -658,9 +658,12 @@ class Reward:
                 unforgivable_action = True
 
         # TODO: The car’s speed is at least 1 m/s greater than its optimal speed while it is making a turn. Essentially the car is turning too fast.
-
-        # TODO: The speed of the car is 1.5 m/s slower than its optimal speed on a straight section. Essentially the car is going too slow on straight sections.
         speed_diff = optimals[2] - speed
+        if speed_diff < -0.5 and get_track_direction(closest_index) != Direction.STRAIGHT:
+            print("Unforgivable action speed difference on turn %f < -0.5" % speed_diff)
+            unforgivable_action = True
+        # TODO: The speed of the car is 1.5 m/s slower than its optimal speed on a straight section. Essentially the car is going too slow on straight sections.
+        
         if speed_diff > 1.0 and get_track_direction(closest_index) == Direction.STRAIGHT:
             print("Unforgivable action speed difference on straight %f > 1.0" % speed_diff)
             unforgivable_action = True
@@ -690,8 +693,8 @@ class Reward:
         # TODO: Update logging
         print("Reward: %f" % reward)
         if self.verbose:
-            print("Speed Reward: %f" % speed_reward * SPEED_MULTIPLE)
-            print("Distance Reward: %f" % distance_reward * DISTANCE_MULTIPLE)
+            print("Speed Reward: %f" % (speed_reward * SPEED_MULTIPLE))
+            print("Distance Reward: %f" % (distance_reward * DISTANCE_MULTIPLE))
             print("Heading Reward: %f" % heading_reward)
 
             # print("Progress Reward: %f" % progress_reward)
