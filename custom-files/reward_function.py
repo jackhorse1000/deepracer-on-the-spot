@@ -529,7 +529,7 @@ class Reward:
         #     distance_reward = math.exp(-0.5*abs(normalized_car_distance_from_route)**2/sigma**2)
 
         ## Reward if car goes close to optimal racing line ##
-        DISTANCE_MULTIPLE = 2
+        DISTANCE_MULTIPLE = 4
         dist = dist_to_racing_line(optimals[0:2], optimals_second[0:2], [x, y])
         distance_reward = max(MINIMAL_REWARD, 1 - (dist / (track_width * 0.5)))
 
@@ -558,11 +558,11 @@ class Reward:
         ############# INCREMENTAL PROGRESS REWARD ##############
 
         # Reward for making steady progress
-        SECTIONS = 10
-        if steps <= 5:
-            progress_reward = MINIMAL_REWARD  # ignore progress in the first 5 steps
-        else:
-            progress_reward = max(MINIMAL_REWARD, 10 * progress / steps)
+        # SECTIONS = 10
+        # if steps <= 5:
+        #     progress_reward = MINIMAL_REWARD  # ignore progress in the first 5 steps
+        # else:
+        #     progress_reward = max(MINIMAL_REWARD, 5 * progress / steps)
 
         # Bonus that the agent gets for completing every 10 percent of track
         # Is exponential in the progress / steps. 
@@ -616,7 +616,7 @@ class Reward:
         reward += heading_reward
         reward += steering_reward
 
-        reward += progress_reward
+        # reward += progress_reward
         reward += steps_reward
         reward += finish_reward
 
@@ -661,6 +661,10 @@ class Reward:
 
         # TODO: The speed of the car is 1.5 m/s slower than its optimal speed on a straight section. Essentially the car is going too slow on straight sections.
         speed_diff = optimals[2] - speed
+        if speed_diff > 1.0 and get_track_direction(closest_index) == Direction.STRAIGHT:
+            print("Unforgivable action speed difference on straight %f > 1.0" % speed_diff)
+            unforgivable_action = True
+            
         if speed_diff > 1.5:
             print("Unforgivable action speed difference %f > 1.5" % speed_diff)
             unforgivable_action = True
@@ -686,15 +690,14 @@ class Reward:
         # TODO: Update logging
         print("Reward: %f" % reward)
         if self.verbose:
-            print("Speed Reward: %f" % speed_reward)
-            print("Distance Reward: %f" % distance_reward)
+            print("Speed Reward: %f" % speed_reward * SPEED_MULTIPLE)
+            print("Distance Reward: %f" % distance_reward * DISTANCE_MULTIPLE)
             print("Heading Reward: %f" % heading_reward)
 
-            print("Progress Reward: %f" % progress_reward)
+            # print("Progress Reward: %f" % progress_reward)
             print("Steps Reward: %f" % steps_reward)
             print("Finish Reward: %f" % finish_reward)
 
-            print("Distance reward (w/out multiple): %f" % (distance_reward))
             print("Optimal speed: %f" % optimals[2])
             print("Speed difference: %f" % speed_diff)
 
