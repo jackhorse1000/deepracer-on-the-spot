@@ -485,9 +485,9 @@ class Reward:
 
         def get_track_direction(closest_index, lookahead=5):
             degrees_turned = track_lookahed_degree_turns(closest_index, lookahead)
-            if -5 > degrees_turned > 5:
+            if -1 > degrees_turned > 1:
                 return Direction.STRAIGHT
-            elif degrees_turned > 5:
+            elif degrees_turned > 1:
                 return Direction.RIGHT
             else:
                 return Direction.LEFT
@@ -498,20 +498,20 @@ class Reward:
         reward = 1
 
         ################ SPEED ################
-        optimal_speed = min(TrackInfo.racing_track[closest_index][2], TrackInfo.MAX_SPEED)
-        sigma_speed = abs(TrackInfo.MAX_SPEED - TrackInfo.MIN_SPEED) / 6.0
-        speed_diff = abs(optimal_speed - speed)
-        speed_reward = math.exp(-0.5 * abs(speed_diff) ** 2 / sigma_speed ** 2)
+        # optimal_speed = min(TrackInfo.racing_track[closest_index][2], TrackInfo.MAX_SPEED)
+        # sigma_speed = abs(TrackInfo.MAX_SPEED - TrackInfo.MIN_SPEED) / 6.0
+        # speed_diff = abs(optimal_speed - speed)
+        # speed_reward = math.exp(-0.5 * abs(speed_diff) ** 2 / sigma_speed ** 2)
 
-        # SPEED_DIFF_NO_REWARD = 1
-        # SPEED_MULTIPLE = 4
-        # speed_diff = abs(optimals[2]-speed)
-        # if speed_diff <= SPEED_DIFF_NO_REWARD:
-        #     # we use quadratic punishment (not linear) bc we're not as confident with the optimal speed
-        #     # so, we do not punish small deviations from optimal speed
-        #     speed_reward = (1 - (speed_diff/(SPEED_DIFF_NO_REWARD))**2)**2
-        # else:
-        #     speed_reward = 0
+        SPEED_DIFF_NO_REWARD = 1
+        SPEED_MULTIPLE = 4
+        speed_diff = abs(optimals[2]-speed)
+        if speed_diff <= SPEED_DIFF_NO_REWARD:
+            # we use quadratic punishment (not linear) bc we're not as confident with the optimal speed
+            # so, we do not punish small deviations from optimal speed
+            speed_reward = (1 - (speed_diff/(SPEED_DIFF_NO_REWARD))**2)**2
+        else:
+            speed_reward = MINIMAL_REWARD
         # reward += speed_reward * SPEED_MULTIPLE
 
         ################ DISTANCE ################
@@ -538,20 +538,15 @@ class Reward:
         ## Reward if speed is close to optimal speed ##
 
         ################ HEADING ################
-        next_route_point_x = optimals_second[0]
-        next_route_point_y = optimals_second[1]
-
-        # Calculate the direction in radius, arctan2(dy, dx), the result is (-pi, pi) in radians between target and current vehicle position
-        route_direction = math.atan2(next_route_point_y - x, next_route_point_x - y)
-        # Convert to degree
-        route_direction = math.degrees(route_direction)
-        # Calculate the difference between the track direction and the heading direction of the car
-        direction_diff = route_direction - heading
-        # Check that the direction_diff is in valid range
-        # Then compute the heading reward
-        heading_reward = math.cos(abs(direction_diff) * (math.pi / 180)) ** 10
-        if abs(direction_diff) <= 20:
-            heading_reward = math.cos(abs(direction_diff) * (math.pi / 180)) ** 4
+        racing_direction_diff, direction_to_align_with_track = racing_direction_diff(optimals[0:2],
+                                                                                     optimals_second[0:2], [x, y],
+                                                                                     heading) 
+        abs_heading_reward = 1 - (racing_direction_diff / 180.0)
+        heading_reward = abs_heading_reward
+        
+        # Reward if steering angle is aligned with direction difference
+        abs_steering_reward = 1 - (abs(steering_angle - racing_direction_diff) / 180.0)
+        steering_reward = abs_steering_reward
 
         ################ CURVE SECTION BONUS ################
         # TODO: Reward for following the curve correctly. The sharper the curve the more reward
@@ -573,18 +568,18 @@ class Reward:
         # Is exponential in the progress / steps. 
         # exponent increases with an increase in fraction of lap completed
 
-        intermediate_progress_bonus = 0.0
-        pi = int(progress // SECTIONS)
+        # intermediate_progress_bonus = 0.0
+        # pi = int(progress // SECTIONS)
 
-        if GlobalParams.progress_reward_list is None:
-            GlobalParams.progress_reward_list = [0] * SECTIONS
+        # if GlobalParams.progress_reward_list is None:
+        #     GlobalParams.progress_reward_list = [0] * (SECTIONS + 1)
 
-        if pi != 0 and GlobalParams.progress_reward_list[pi] == 0:
-            if pi == int(100 // SECTIONS):  # 100% track completion
-                intermediate_progress_bonus = progress_reward ** 14
-            else:
-                intermediate_progress_bonus = progress_reward ** (5 + 0.75 * pi)
-            GlobalParams.progress_reward_list[pi] = intermediate_progress_bonus
+        # if pi != 0 and GlobalParams.progress_reward_list[pi] == 0:
+        #     if pi == int(100 // SECTIONS):  # 100% track completion
+        #         intermediate_progress_bonus = progress_reward ** 14
+        #     else:
+        #         intermediate_progress_bonus = progress_reward ** (5 + 0.75 * pi)
+        #     GlobalParams.progress_reward_list[pi] = intermediate_progress_bonus
 
         ################ LESS STEPS REWARD ################
 
@@ -616,12 +611,12 @@ class Reward:
             finish_reward = 0
 
         ################ SUM UP REWARD ################
-        reward += speed_reward
-        reward += distance_reward
+        reward += speed_reward * SPEED_MULTIPLE
+        reward += distance_reward * DISTANCE_MULTIPLE
         reward += heading_reward
+        reward += steering_reward
 
         reward += progress_reward
-        reward += intermediate_progress_bonus
         reward += steps_reward
         reward += finish_reward
 
@@ -631,9 +626,7 @@ class Reward:
 
         # TODO: Direction diff exceeds 30 degrees
         # Zero reward if obviously wrong direction (e.g. spin)
-        racing_direction_diff, direction_to_align_with_track = racing_direction_diff(optimals[0:2],
-                                                                                     optimals_second[0:2], [x, y],
-                                                                                     heading)
+        
         if racing_direction_diff > 30:
             print("Unforgivable action racing direction %f > 30" % racing_direction_diff)
             unforgivable_action = True
@@ -652,12 +645,14 @@ class Reward:
 
         car_direction_relative_to_racing_line = position_relative_to_race_line(optimals[0:2], optimals_second[0:2], [x, y], heading)
         # TODO: The car turns to the right when it should be taking a left turn.
-        if car_direction_relative_to_racing_line == Direction.LEFT and dist > compute_tolerance(track_width) and not (steering_angle < 2):
+        if car_direction_relative_to_racing_line == Direction.LEFT and dist > compute_tolerance(track_width) and not (steering_angle < 2) \
+            and get_track_direction(closest_index) != Direction.LEFT:
             # if direction_to_align_with_track == Direction.RIGHT and not (steering_angle < 2):
                 print("Unforgivable action. Should turn right. Action is left. %f angle diff, %f steering angle", racing_direction_diff, steering_angle)
                 unforgivable_action = True
 
-        if car_direction_relative_to_racing_line == Direction.RIGHT and dist > compute_tolerance(track_width) and not (steering_angle > -2):
+        if car_direction_relative_to_racing_line == Direction.RIGHT and dist > compute_tolerance(track_width) and not (steering_angle > -2) \
+            and get_track_direction(closest_index) != Direction.RIGHT:
             # if direction_to_align_with_track == Direction.LEFT and not (steering_angle > -2):
                 print("Unforgivable action. Should turn left. Action is right. %f angle diff, %f steering angle", racing_direction_diff, steering_angle)
                 unforgivable_action = True
@@ -676,8 +671,8 @@ class Reward:
             unforgivable_action = True
 
         if GlobalParams.prev_direction_diff is not None and \
-                abs(direction_diff) > 30 and (abs(direction_diff) > abs(GlobalParams.prev_direction_diff)):
-            print("FAR AWAY FROM DIRECTION AND GETTING WORST: %f %f" % direction_diff, GlobalParams.prev_direction_diff)
+                abs(racing_direction_diff) > 30 and (abs(racing_direction_diff) > abs(GlobalParams.prev_direction_diff)):
+            print("FAR AWAY FROM DIRECTION AND GETTING WORST: %f %f" % racing_direction_diff, GlobalParams.prev_direction_diff)
             unforgivable_action = True
 
         if unforgivable_action:
@@ -696,7 +691,6 @@ class Reward:
             print("Heading Reward: %f" % heading_reward)
 
             print("Progress Reward: %f" % progress_reward)
-            print("Progress bonus Reward:", intermediate_progress_bonus)
             print("Steps Reward: %f" % steps_reward)
             print("Finish Reward: %f" % finish_reward)
 
