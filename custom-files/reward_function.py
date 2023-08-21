@@ -485,7 +485,8 @@ class Reward:
 
         def get_track_direction(closest_index, lookahead=5):
             degrees_turned = track_lookahed_degree_turns(closest_index, lookahead)
-            if -1 > degrees_turned > 1:
+            # print(degrees_turned)
+            if -1 < degrees_turned < 1:
                 return Direction.STRAIGHT
             elif degrees_turned > 1:
                 return Direction.RIGHT
@@ -664,12 +665,12 @@ class Reward:
             unforgivable_action = True
         # TODO: The speed of the car is 1.5 m/s slower than its optimal speed on a straight section. Essentially the car is going too slow on straight sections.
         
-        if speed_diff > 1.0 and get_track_direction(closest_index) == Direction.STRAIGHT:
+        if speed_diff > 1 and get_track_direction(closest_index) == Direction.STRAIGHT:
             print("Unforgivable action speed difference on straight %f > 1.0" % speed_diff)
             unforgivable_action = True
             
-        if speed_diff > 1.5:
-            print("Unforgivable action speed difference %f > 1.5" % speed_diff)
+        if speed_diff > 1:
+            print("Unforgivable action speed difference %f > 1" % speed_diff)
             unforgivable_action = True
 
         ## Zero reward if off track ##
@@ -719,8 +720,8 @@ def reward_function(params):
 
 def get_test_params():
     return {
-        'x': 2.1124,
-        'y': 0.5105,
+        'x': -0.11087, 
+        'y': -3.28924,
         'heading': 160.0,
         'track_width': 0.45,
         'is_reversed': False,
@@ -731,7 +732,7 @@ def get_test_params():
         'distance_from_center': 0.0,
         'closest_waypoints': [0, 1, 2],
         'is_left_of_center': False,
-        'speed': 3.0,
+        'speed': 2.0,
         'is_offtrack': False,
         'waypoints': [
             [0.75, -0.7],
