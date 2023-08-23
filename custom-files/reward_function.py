@@ -396,14 +396,14 @@ class Reward:
                 result = 9999
 
             return result
-        
+
         def position_relative_to_race_line(car_coords, closest_coords, second_closest_coords, heading):
-            
+
             next_point, prev_point = next_prev_racing_point(closest_coords,
                                                             second_closest_coords,
                                                             car_coords,
                                                             heading)
-            
+
             x1, y1 = prev_point
             x2, y2 = next_point
             car_x, car_y = car_coords
@@ -506,11 +506,11 @@ class Reward:
 
         SPEED_DIFF_NO_REWARD = 1
         SPEED_MULTIPLE = 4
-        speed_diff = abs(optimals[2]-speed)
+        speed_diff = abs(optimals[2] - speed)
         if speed_diff <= SPEED_DIFF_NO_REWARD:
             # we use quadratic punishment (not linear) bc we're not as confident with the optimal speed
             # so, we do not punish small deviations from optimal speed
-            speed_reward = (1 - (speed_diff/(SPEED_DIFF_NO_REWARD))**2)**2
+            speed_reward = (1 - (speed_diff / (SPEED_DIFF_NO_REWARD)) ** 2) ** 2
         else:
             speed_reward = MINIMAL_REWARD
         # reward += speed_reward * SPEED_MULTIPLE
@@ -523,14 +523,14 @@ class Reward:
         #     distance_from_route = 0
         #     distance_reward = 1
         # elif "right" in bearing: #i.e. on right side of the route line
-        #     sigma=abs(normalized_route_distance_from_inner_border / 4) 
+        #     sigma=abs(normalized_route_distance_from_inner_border / 4)
         #     distance_reward = math.exp(-0.5*abs(normalized_car_distance_from_route)**2/sigma**2)
         # elif "left" in bearing: #i.e. on left side of the route line
-        #     sigma=abs(normalized_route_distance_from_outer_border / 4) 
+        #     sigma=abs(normalized_route_distance_from_outer_border / 4)
         #     distance_reward = math.exp(-0.5*abs(normalized_car_distance_from_route)**2/sigma**2)
 
         ## Reward if car goes close to optimal racing line ##
-        DISTANCE_MULTIPLE = 2.5
+        DISTANCE_MULTIPLE = 4
         dist = dist_to_racing_line(optimals[0:2], optimals_second[0:2], [x, y])
         distance_reward = max(MINIMAL_REWARD, 1 - (dist / (track_width * 0.5)))
 
@@ -539,14 +539,12 @@ class Reward:
         ## Reward if speed is close to optimal speed ##
 
         ################ HEADING ################
-        HEADING_MULTIPLE = 2
         racing_direction_diff, direction_to_align_with_track = racing_direction_diff(optimals[0:2],
                                                                                      optimals_second[0:2], [x, y],
-                                                                                     heading) 
-        
+                                                                                     heading)
         abs_heading_reward = 1 - (racing_direction_diff / 180.0)
         heading_reward = abs_heading_reward
-        
+
         # Reward if steering angle is aligned with direction difference
         abs_steering_reward = 1 - (abs(steering_angle - racing_direction_diff) / 180.0)
         steering_reward = abs_steering_reward
@@ -568,7 +566,7 @@ class Reward:
         #     progress_reward = max(MINIMAL_REWARD, 5 * progress / steps)
 
         # Bonus that the agent gets for completing every 10 percent of track
-        # Is exponential in the progress / steps. 
+        # Is exponential in the progress / steps.
         # exponent increases with an increase in fraction of lap completed
 
         # intermediate_progress_bonus = 0.0
@@ -594,7 +592,7 @@ class Reward:
             steps_prediction = projected_time * 15 + 1
             reward_prediction = max(MINIMAL_REWARD, (-REWARD_PER_STEP_FOR_FASTEST_TIME * (TrackInfo.FASTEST_TIME) /
                                                      (TrackInfo.STANDARD_TIME - TrackInfo.FASTEST_TIME)) * (
-                                                steps_prediction - (TrackInfo.STANDARD_TIME * 15 + 1)))
+                                            steps_prediction - (TrackInfo.STANDARD_TIME * 15 + 1)))
             steps_reward = min(REWARD_PER_STEP_FOR_FASTEST_TIME, reward_prediction / steps_prediction)
         except:
             steps_reward = MINIMAL_REWARD
@@ -609,9 +607,19 @@ class Reward:
         if progress == 100:
             finish_reward = max(MINIMAL_REWARD, (-REWARD_FOR_FASTEST_TIME /
                                                  (15 * (TrackInfo.STANDARD_TIME - TrackInfo.FASTEST_TIME))) * (
-                                            steps - TrackInfo.STANDARD_TIME * 15))
+                                        steps - TrackInfo.STANDARD_TIME * 15))
         else:
-            finish_reward = MINIMAL_REWARD
+            finish_reward = 0
+
+        ################ SUM UP REWARD ################
+        reward += speed_reward * SPEED_MULTIPLE
+        reward += distance_reward * DISTANCE_MULTIPLE
+        reward += heading_reward
+        reward += steering_reward
+
+        # reward += progress_reward
+        reward += steps_reward
+        reward += finish_reward
 
         #################### UNFORGIVALABLE ACTIONS ####################
         unforgivable_action = False
@@ -619,10 +627,11 @@ class Reward:
 
         # TODO: Direction diff exceeds 30 degrees
         # Zero reward if obviously wrong direction (e.g. spin)
-        
+
         if racing_direction_diff > 30:
             print("Unforgivable action racing direction %f > 30" % racing_direction_diff)
             unforgivable_action = True
+
         # TODO: The car is currently heading in the right direction but takes a steering action that causes it to point off-course.
         # TODO: The car turns to the left when it should be taking a right turn.
         # if get_track_direction(closest_index) == Direction.RIGHT and steering_angle < -5:
@@ -632,23 +641,28 @@ class Reward:
         # if get_track_direction(closest_index) == Direction.LEFT and steering_angle < -5:
         #     print("Unforgivable action. Track goes Left. Action is Right.")
         #     unforgivable_action = True
-        
+
         def compute_tolerance(track_width, alpha=0.1):
             return alpha * track_width
 
-        car_direction_relative_to_racing_line = position_relative_to_race_line(optimals[0:2], optimals_second[0:2], [x, y], heading)
+        car_direction_relative_to_racing_line = position_relative_to_race_line(optimals[0:2], optimals_second[0:2],
+                                                                               [x, y], heading)
         # TODO: The car turns to the right when it should be taking a left turn.
-        if car_direction_relative_to_racing_line == Direction.LEFT and dist > compute_tolerance(track_width) and not (steering_angle < 2) \
-            and get_track_direction(closest_index) != Direction.LEFT:
+        if car_direction_relative_to_racing_line == Direction.LEFT and dist > compute_tolerance(track_width) and not (
+                steering_angle < 2) \
+                and get_track_direction(closest_index) != Direction.LEFT:
             # if direction_to_align_with_track == Direction.RIGHT and not (steering_angle < 2):
-                print("Unforgivable action. Should turn right. Action is left. %f angle diff, %f steering angle", racing_direction_diff, steering_angle)
-                unforgivable_action = True
+            print("Unforgivable action. Should turn right. Action is left. %f angle diff, %f steering angle",
+                  racing_direction_diff, steering_angle)
+            unforgivable_action = True
 
-        if car_direction_relative_to_racing_line == Direction.RIGHT and dist > compute_tolerance(track_width) and not (steering_angle > -2) \
-            and get_track_direction(closest_index) != Direction.RIGHT:
+        if car_direction_relative_to_racing_line == Direction.RIGHT and dist > compute_tolerance(track_width) and not (
+                steering_angle > -2) \
+                and get_track_direction(closest_index) != Direction.RIGHT:
             # if direction_to_align_with_track == Direction.LEFT and not (steering_angle > -2):
-                print("Unforgivable action. Should turn left. Action is right. %f angle diff, %f steering angle", racing_direction_diff, steering_angle)
-                unforgivable_action = True
+            print("Unforgivable action. Should turn left. Action is right. %f angle diff, %f steering angle",
+                  racing_direction_diff, steering_angle)
+            unforgivable_action = True
 
         # TODO: The car’s speed is at least 1 m/s greater than its optimal speed while it is making a turn. Essentially the car is turning too fast.
         speed_diff = optimals[2] - speed
@@ -656,11 +670,11 @@ class Reward:
             print("Unforgivable action speed difference on turn %f < -0.5" % speed_diff)
             unforgivable_action = True
         # TODO: The speed of the car is 1.5 m/s slower than its optimal speed on a straight section. Essentially the car is going too slow on straight sections.
-        
-        if speed_diff > 0.5 and get_track_direction(closest_index) == Direction.STRAIGHT:
-            print("Unforgivable action speed difference on straight %f > 0.5" % speed_diff)
+
+        if speed_diff > 1 and get_track_direction(closest_index) == Direction.STRAIGHT:
+            print("Unforgivable action speed difference on straight %f > 1.0" % speed_diff)
             unforgivable_action = True
-            
+
         if speed_diff > 1:
             print("Unforgivable action speed difference %f > 1" % speed_diff)
             unforgivable_action = True
@@ -671,25 +685,14 @@ class Reward:
             unforgivable_action = True
 
         if GlobalParams.prev_direction_diff is not None and \
-                abs(racing_direction_diff) > 30 and (abs(racing_direction_diff) > abs(GlobalParams.prev_direction_diff)):
-            print("FAR AWAY FROM DIRECTION AND GETTING WORST: %f %f" % racing_direction_diff, GlobalParams.prev_direction_diff)
+                abs(racing_direction_diff) > 30 and (
+                abs(racing_direction_diff) > abs(GlobalParams.prev_direction_diff)):
+            print("FAR AWAY FROM DIRECTION AND GETTING WORST: %f %f" % racing_direction_diff,
+                  GlobalParams.prev_direction_diff)
             unforgivable_action = True
 
-        ################ REWARD ################
-        reward += (speed_reward * SPEED_MULTIPLE) ** 2
-        reward += (distance_reward * DISTANCE_MULTIPLE) ** 2
-        reward += heading_reward
-        reward += steering_reward
-
-        # reward += progress_reward
-        reward += steps_reward
-        
-        
         if unforgivable_action:
             reward = MINIMAL_REWARD
-            
-        # We should always give finish reward
-        reward += finish_reward
 
         #################### UPDATE PREVIOUS STATE ####################
         PreviousState.update_params(params)
@@ -725,7 +728,7 @@ def reward_function(params):
 
 def get_test_params():
     return {
-        'x': -0.11087, 
+        'x': -0.11087,
         'y': -3.28924,
         'heading': 160.0,
         'track_width': 0.45,
@@ -762,6 +765,5 @@ def test_reward():
     print("test_reward: {}".format(reward))
 
     assert reward > 0.0
-
 
 # test_reward()
