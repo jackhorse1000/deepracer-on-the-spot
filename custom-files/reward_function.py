@@ -432,6 +432,12 @@ class Reward:
         if direction_diff > 20:
             reward = 1e-3
             
+        if speed_diff <= SPEED_DIFF_NO_REWARD:
+            reward = 1e-3        
+        
+        if dist > 0.2:
+            reward = 1e-3
+
         # Zero reward of obviously too slow
         # speed_diff_zero = optimals[2]-speed
         # if speed_diff_zero > 0.5:
@@ -460,9 +466,9 @@ class Reward:
 
         ####################### VERBOSE #######################
         if self.verbose == True:
-            print("Closest index: %i" % closest_index)
+            # print("Closest index: %i" % closest_index)
             print("Distance to racing line: %f, reward =  %f" % (dist, distance_reward))
-            print("Optimal speed: %f" % optimals[2])
+            # print("Optimal speed: %f" % optimals[2])
             print("Speed difference: %f, reward = %f" % (speed_diff, speed_reward))
             print("Direction difference: %f, reward = %f" % (direction_diff, direction_diff_reward))
             print("Predicted time: %f" % projected_time)
@@ -472,7 +478,7 @@ class Reward:
         #################### RETURN REWARD ####################
         
         # Always return a float value
-        return float(reward)
+        return float(max(1e-3, reward))
 
 
 reward_object = Reward() # add parameter verbose=True to get noisy output for testing
