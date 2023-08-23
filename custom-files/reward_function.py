@@ -432,7 +432,7 @@ class Reward:
         if direction_diff > 20:
             reward = 1e-3
             
-        if speed_diff <= SPEED_DIFF_NO_REWARD:
+        if speed_diff > SPEED_DIFF_NO_REWARD:
             reward = 1e-3        
         
         if dist > 0.2:
