@@ -415,7 +415,7 @@ class Reward:
         # reward += steps_reward
 
 
-        progress_reward = 10 * progress / steps
+        progress_reward = (progress**2) / steps
         if steps <= 5:
             progress_reward = 1 #ignore progress in the first 5 steps
 
@@ -444,19 +444,22 @@ class Reward:
         #     reward = 1e-3
             
         ## Incentive for finishing the lap in less steps ##
-        REWARD_FOR_FASTEST_TIME = 1500 # should be adapted to track length and other rewards
+        REWARD_FOR_FASTEST_TIME = 3000 # should be adapted to track length and other rewards
         STANDARD_TIME = 18  # seconds (time that is easily done by model)
         FASTEST_TIME = 15 # seconds (best time of 1st place on the track)
         if progress == 100:
             finish_reward = max(1e-3, (-REWARD_FOR_FASTEST_TIME /
-                      (15*(STANDARD_TIME-FASTEST_TIME)))*(steps-STANDARD_TIME*15))
+                      (15*(STANDARD_TIME-FASTEST_TIME)))*(steps-STANDARD_TIME*15)) + progress_reward
         else:
             finish_reward = 0
         reward += finish_reward
         
+        if progress == 75 or progress == 50 or progress == 25 or  progress == 10:
+            reward += (progress**3) / steps
         ## Zero reward if off track ##
         if all_wheels_on_track == False:
             reward = 1e-3
+
 
         # Before returning reward, update the variables
         PARAMS.prev_speed = speed
