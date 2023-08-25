@@ -1,6 +1,7 @@
 import math
 import numpy as np
 from enum import Enum
+from copy import copy
 
 MINIMAL_REWARD = 1e-3
 
@@ -241,15 +242,17 @@ class TrackInfo:
 class GlobalParams:
     progress_reward_list = None
     prev_direction_diff = None
+    first_racingpoint_index = None
 
     @classmethod
     def reset(cls):
         cls.progress_reward_list = None
+        cls.prev_direction_diff = None
+        cls.first_racingpoint_index = None
 
 
 class Reward:
     def __init__(self, verbose=True):
-        self.first_racingpoint_index = None
         self.verbose = verbose
 
     def reward_function(self, params):
@@ -455,9 +458,10 @@ class Reward:
         optimals_second = TrackInfo.racing_track[second_closest_index]
 
         # Save first racingpoint of episode for later
-        if self.first_racingpoint_index is None:
-            self.first_racingpoint_index = closest_index
-            print("first_racingpoint_index is set to: ", self.first_racingpoint_index)
+        if GlobalParams.first_racingpoint_index is None:
+            GlobalParams.first_racingpoint_index = closest_index
+            
+            print("first_racingpoint_index is set to: ", GlobalParams.first_racingpoint_index)
 
         ############### HELPER VARIABLES ################
 
@@ -570,10 +574,7 @@ class Reward:
         # exponent increases with an increase in fraction of lap completed
 
         # intermediate_progress_bonus = 0.0
-        # pi = int(progress // SECTIONS)
-
-        # if GlobalParams.progress_reward_list is None:
-        #     GlobalParams.progress_reward_list = [0] * (SECTIONS + 1)
+        
 
         # if pi != 0 and GlobalParams.progress_reward_list[pi] == 0:
         #     if pi == int(100 // SECTIONS):  # 100% track completion
@@ -587,7 +588,7 @@ class Reward:
         # Reward if less steps
         REWARD_PER_STEP_FOR_FASTEST_TIME = 1
         times_list = [row[3] for row in TrackInfo.racing_track]
-        projected_time = calc_projected_time(self.first_racingpoint_index, closest_index, steps, times_list)
+        projected_time = calc_projected_time(GlobalParams.first_racingpoint_index, closest_index, steps, times_list)
         try:
             steps_prediction = projected_time * 15 + 1
             reward_prediction = max(MINIMAL_REWARD, (-REWARD_PER_STEP_FOR_FASTEST_TIME * (TrackInfo.FASTEST_TIME) /
@@ -599,6 +600,42 @@ class Reward:
 
         # TODO: Review and commented code
         # TODO: Add to punishment
+        ################ CHECKPOINT REWARD ################
+        
+        def get_time_between_two_indicies(starting_index, current_index):
+            assert 0 <= starting_index < len(TrackInfo.racing_track)
+            assert 0 <= current_index <len(TrackInfo.racing_track)
+            
+            result = 0.0
+            if starting_index == current_index:
+                return result
+
+            counter_index = copy(starting_index) + 1
+            
+            while counter_index != current_index:
+                result += TrackInfo.racing_track[counter_index][3]
+                counter_index = (counter_index + 1) % len(TrackInfo.racing_track)
+                
+            result += TrackInfo.racing_track[current_index][3]
+            return result
+        
+        SECTIONS = 10
+        pi = int(progress // SECTIONS)
+
+        if GlobalParams.progress_reward_list is None:
+            GlobalParams.progress_reward_list = [0] * (SECTIONS + 1)
+        
+        checkpoint_reward = 0.0
+        REWARD_FOR_FASTEST_CHECKPOINT_TIME = 100
+        standard_multiplier = float(TrackInfo.STANDARD_TIME)/float(TrackInfo.FASTEST_TIME)
+        if pi != 0 and GlobalParams.progress_reward_list[pi] == 0 and steps != 0 and GlobalParams.first_racingpoint_index != closest_index:
+            fastest_time = get_time_between_two_indicies(GlobalParams.first_racingpoint_index, closest_index)
+            standard_time = standard_multiplier * fastest_time
+            checkpoint_reward = max(MINIMAL_REWARD, (-REWARD_FOR_FASTEST_CHECKPOINT_TIME / (15 * (standard_time - fastest_time))) * (steps - standard_time * 15))
+            GlobalParams.progress_reward_list[pi] = checkpoint_reward
+
+
+            
 
         ################ FINAL REWARD ################
 
@@ -606,8 +643,7 @@ class Reward:
         REWARD_FOR_FASTEST_TIME = 1500  # should be adapted to track length and other rewards
         if progress == 100:
             finish_reward = max(MINIMAL_REWARD, (-REWARD_FOR_FASTEST_TIME /
-                                                 (15 * (TrackInfo.STANDARD_TIME - TrackInfo.FASTEST_TIME))) * (
-                                            steps - TrackInfo.STANDARD_TIME * 15))
+                                                 (15 * (TrackInfo.STANDARD_TIME - TrackInfo.FASTEST_TIME))) * (steps - TrackInfo.STANDARD_TIME * 15))
         else:
             finish_reward = 0
 
@@ -687,6 +723,7 @@ class Reward:
             reward = MINIMAL_REWARD
         
         reward += finish_reward
+        reward += checkpoint_reward
 
         #################### UPDATE PREVIOUS STATE ####################
         PreviousState.update_params(params)
@@ -702,7 +739,10 @@ class Reward:
 
             # print("Progress Reward: %f" % progress_reward)
             print("Steps Reward: %f" % steps_reward)
-            print("Finish Reward: %f" % finish_reward)
+            if finish_reward > 0:
+                print("Finish Reward: %f" % finish_reward)
+            if checkpoint_reward > 0:
+                print("Checkpoint Reward: %f" % checkpoint_reward)
 
             print("Optimal speed: %f" % optimals[2])
             print("Speed difference: %f" % speed_diff)
