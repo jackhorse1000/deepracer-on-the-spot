@@ -451,14 +451,14 @@ class Reward:
             finish_reward = max(1e-3, (-REWARD_FOR_FASTEST_TIME /
                       (15*(STANDARD_TIME-FASTEST_TIME)))*(steps-STANDARD_TIME*15)) + progress_reward
         else:
-            finish_reward = 0
+            finish_reward = 1e-3
         reward += finish_reward
         
         if progress == 75 or progress == 50 or progress == 25 or  progress == 10:
             reward += (progress**3) / steps
         ## Zero reward if off track ##
         if all_wheels_on_track == False:
-            reward = 1e-3
+            reward = finish_reward
 
 
         # Before returning reward, update the variables
