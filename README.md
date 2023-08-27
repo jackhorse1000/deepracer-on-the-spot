@@ -44,7 +44,6 @@ The primary purpose of this template is to provide a simple single script to run
 This bash script utilizes the base.resources.yaml template file to provision the above resources. 
 
 ---
-
 ## Create Standard/Spot Instance
 ### create-standard-instance.sh
 ### create-spot-instance.sh
@@ -69,6 +68,13 @@ This script can be executed many times (the DeepRacer console limits you to trai
 Both spot and standard instance requests are launched using a daily refreshing AMI that is generated in a source AWS account to always grab the newest docker images for robomaker/sagemaker/coach. If you wish to run your own AMI, or run in a region other than us-east-1, use ./create-image-builder.sh to create the daily refreshing pipeline and update your spot/standard instance bash scripts to use your AMI. NOTE: using your own AMI will incur a charge of ~$1/day because an EC2 instance will be created daily to update the AMI.
 
 ---
+### MENU
+You can also use the menu.sh to start training, modify config files, and run scripts.
+
+Simply run:
+`./menu.sh` or `python3 menu.py`
+
+![menu showing how to start deepracer on the spot](media/menu.png)
 
 ### OTHER COMMANDS:
 
@@ -108,8 +114,15 @@ This script can be used to delete the resources created by the create-base-resou
 <li>Pull new sagemaker/robomaker docker images: https://github.com/aws-deepracer-community/deepracer-simapp
 
 ## FAQ
-Exceeded max rules of 20 per network ACL 
-<li>From AWS console, navigate to the VPC service console and select "Your VPCs"</li>
-<li>click the ACL in your VPC that was created by your base resources stack </li> 
-<li>Select the "inbound rules" tab and you may edit the inbound rules to remove 2-3 rules from this section that are higher on the list and end in port 32 with a non-rounded number. This will remove access from some existing IPs.</li>
-<li>Now run scripts/add-access.sh script from CloudShell to add your IP to this inbound rules list and you should be able to access the instance. </li>
+
+If you have an issue with training, the best first place to check is CloudFormation "Events" tab to see if there are any errors related to deploying your stack.
+
+| Issue | Description |
+| --- | --- |
+| The maximum number of network acl entries has been reached | <li>From AWS console, navigate to the VPC service console and select "Your VPCs"</li> <li>Click the ACL in your VPC that was created by your base resources stack </li>  <li>Select the "inbound rules" tab and you may edit the inbound rules to remove 2-3 rules from this section that are higher on the list and end in port 32 with a non-rounded number. This will remove access from some existing IPs.</li> <li>Now run scripts/add-access.sh script from CloudShell to add your IP to this inbound rules list and you should be able to access the instance. </li> <li> Alternatively, you may also just request a higher quota. Navigate to "service quota" service, search for "VPC" -> "ACL" -> "Rules per network ACL" and update from 20 to a larger number such as 40 </li>|
+| Exception when checking for DEEPRACER_JOB_TYPE_ENV 'Local' is not valid DeepRacerJobType | <li>This is an error from DRFC and should not affect your training. If you see it in your logs you can ignore it. </li> |
+| S3 failed, retry count 1/5: An error occurred (404) when calling the HeadObject operation: Not Found | <li>This is an error from DRFC and should not affect your training. If you see it in your logs you can ignore it. </li> |
+| model imported to console says track is reInvent:2018 | <li>This is a bug on AWS side as the import process does not check the track the model was trained on. This is purely a visual issue and does not impact your model. You can continue to train/evaluate on any track you choose. </li> |
+| Import model from console to DOTS | <li>From DeepRacer Console, select the model you wish to move to DOTS. In the "Actions" dropdown, select "copy to s3", "create a new bucket", and include the "model" and "logs". Copy the s3 location it will be copied to and hit submit.</li><li>Launch CloudShell and copy this model to your base stack S3 bucket using this command and substitute in your bucket names and model names:  `aws s3 cp "s3://aws-deepracer-assets-b9436ddf-db0a-4f63/my-deepracer-console-model-name/Mon, 17 Jul 2023 17:53:33 GMT/" "s3://my-base-bucket/my-new-model-name" --recursive` </li><li>Your model can now be trained on top of in DOTS by setting the `DR_LOCAL_S3_PRETRAINED_PREFIX` variable to the name of your model. </li> |
+| How do I train continuous/SAC instead of discrete action space? | <li>Rename the two example files in custom-files directory "hyperparameters_sac.json" to "hyperparameters.json" and "model_metadata_sac.json" to "model_metadata.json" </li> |
+| What if multiple people use the same AWS sandbox? | <li>CloudShell sessions are unique to each user, and each user can clone this repo and create one base-resource stack and as many trainings as they desire. To share models amongst the same account, copy the model from one s3 bucket to the other. </li> |
