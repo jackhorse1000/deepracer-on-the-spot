@@ -388,7 +388,7 @@ class Reward:
         # reward += distance_reward * DISTANCE_MULTIPLE
 
         ## Reward if speed is close to optimal speed ##
-        SPEED_DIFF_NO_REWARD = 1
+        SPEED_DIFF_NO_REWARD = 0.5
         SPEED_MULTIPLE = 2
         speed_diff = abs(optimals[2]-speed)
         if speed_diff <= SPEED_DIFF_NO_REWARD:
