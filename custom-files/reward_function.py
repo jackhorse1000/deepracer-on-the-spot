@@ -695,8 +695,8 @@ class Reward:
             print("Unforgivable action speed difference on straight %f > 1.0" % speed_diff)
             unforgivable_action = True
             
-        if speed_diff > 1:
-            print("Unforgivable action speed difference %f > 1" % speed_diff)
+        if speed_diff > 1.5:
+            print("Unforgivable action speed difference %f > 1.5" % speed_diff)
             unforgivable_action = True
 
         ## Zero reward if off track ##
