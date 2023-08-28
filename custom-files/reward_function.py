@@ -509,7 +509,7 @@ class Reward:
         # speed_reward = math.exp(-0.5 * abs(speed_diff) ** 2 / sigma_speed ** 2)
 
         SPEED_DIFF_NO_REWARD = 1
-        SPEED_MULTIPLE = 4
+        SPEED_MULTIPLE = 1
         speed_diff = abs(optimals[2]-speed)
         if speed_diff <= SPEED_DIFF_NO_REWARD:
             # we use quadratic punishment (not linear) bc we're not as confident with the optimal speed
