@@ -686,8 +686,8 @@ class Reward:
 
         # TODO: The car’s speed is at least 1 m/s greater than its optimal speed while it is making a turn. Essentially the car is turning too fast.
         speed_diff = optimals[2] - speed
-        if speed_diff < -0.5 and get_track_direction(closest_index) != Direction.STRAIGHT:
-            print("Unforgivable action speed difference on turn %f < -0.5" % speed_diff)
+        if speed_diff < -0.2 and get_track_direction(closest_index) != Direction.STRAIGHT:
+            print("Unforgivable action speed difference on turn %f < -0.2" % speed_diff)
             unforgivable_action = True
         # TODO: The speed of the car is 1.5 m/s slower than its optimal speed on a straight section. Essentially the car is going too slow on straight sections.
         
