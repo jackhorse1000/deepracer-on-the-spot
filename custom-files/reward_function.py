@@ -711,10 +711,11 @@ class Reward:
             
         
         ################ REWARD ################
-        reward += speed_reward * SPEED_MULTIPLE
-        reward += distance_reward * DISTANCE_MULTIPLE
+        reward += speed_reward * SPEED_MULTIPLE if speed_reward != MINIMAL_REWARD else MINIMAL_REWARD
+        reward += distance_reward * DISTANCE_MULTIPLE if distance_reward != MINIMAL_REWARD else MINIMAL_REWARD
         reward += heading_reward
         reward += steering_reward
+        reward += checkpoint_reward
 
         # reward += progress_reward
         reward += steps_reward
@@ -723,7 +724,7 @@ class Reward:
             reward = MINIMAL_REWARD
         
         reward += finish_reward
-        reward += checkpoint_reward
+        
 
         #################### UPDATE PREVIOUS STATE ####################
         PreviousState.update_params(params)
@@ -733,9 +734,10 @@ class Reward:
         # TODO: Update logging
         print("Reward: %f" % reward)
         if self.verbose:
-            print("Speed Reward: %f" % (speed_reward * SPEED_MULTIPLE))
-            print("Distance Reward: %f" % (distance_reward * DISTANCE_MULTIPLE))
+            print("Speed Reward: %f" % (speed_reward * SPEED_MULTIPLE if speed_reward != MINIMAL_REWARD else MINIMAL_REWARD))
+            print("Distance Reward: %f" % (distance_reward * DISTANCE_MULTIPLE if distance_reward != MINIMAL_REWARD else MINIMAL_REWARD))
             print("Heading Reward: %f" % heading_reward)
+            print("Steering Reward: %f" % steering_reward)
 
             # print("Progress Reward: %f" % progress_reward)
             print("Steps Reward: %f" % steps_reward)
