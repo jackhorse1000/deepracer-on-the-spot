@@ -67,7 +67,7 @@ class TrackInfo:
     MIN_SPEED = 2.2
     MAX_SPEED = 4.0
     STANDARD_TIME = 20.0
-    FASTEST_TIME = 14.0
+    FASTEST_TIME = 16.0
     racing_track = [[-0.32907, -3.68667, 4.0, 0.04281],
                     [-0.21511, -3.74923, 4.0, 0.0325],
                     [-0.10115, -3.8118, 4.0, 0.0325],
@@ -509,7 +509,7 @@ class Reward:
         # speed_reward = math.exp(-0.5 * abs(speed_diff) ** 2 / sigma_speed ** 2)
 
         SPEED_DIFF_NO_REWARD = 1
-        SPEED_MULTIPLE = 1
+        SPEED_MULTIPLE = 4
         speed_diff = abs(optimals[2]-speed)
         if speed_diff <= SPEED_DIFF_NO_REWARD:
             # we use quadratic punishment (not linear) bc we're not as confident with the optimal speed
@@ -698,6 +698,12 @@ class Reward:
         if speed_diff > 1.5:
             print("Unforgivable action speed difference %f > 1.5" % speed_diff)
             unforgivable_action = True
+            
+        # Distance from racing line punishment
+        if dist > 0.3:
+            print("Unforgivable action distance from racing line %f > 0.3" % dist)
+            unforgivable_action = True
+            
 
         ## Zero reward if off track ##
         if not all_wheels_on_track:
@@ -715,14 +721,12 @@ class Reward:
         reward += distance_reward * DISTANCE_MULTIPLE if distance_reward != MINIMAL_REWARD else MINIMAL_REWARD
         reward += heading_reward
         reward += steering_reward
-        reward += checkpoint_reward
-
-        # reward += progress_reward
         reward += steps_reward
         
         if unforgivable_action:
             reward = MINIMAL_REWARD
         
+        reward += checkpoint_reward
         reward += finish_reward
         
 
