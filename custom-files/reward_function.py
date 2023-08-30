@@ -67,7 +67,7 @@ class TrackInfo:
     MIN_SPEED = 2.2
     MAX_SPEED = 4.0
     STANDARD_TIME = 20.0
-    FASTEST_TIME = 16.0
+    FASTEST_TIME = 14.3
     racing_track = [[-0.32907, -3.68667, 4.0, 0.04281],
                     [-0.21511, -3.74923, 4.0, 0.0325],
                     [-0.10115, -3.8118, 4.0, 0.0325],
