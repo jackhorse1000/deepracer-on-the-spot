@@ -672,17 +672,17 @@ class Reward:
 
         car_direction_relative_to_racing_line = position_relative_to_race_line(optimals[0:2], optimals_second[0:2], [x, y], heading)
         # TODO: The car turns to the right when it should be taking a left turn.
-        if car_direction_relative_to_racing_line == Direction.LEFT and dist > compute_tolerance(track_width) and not (steering_angle < 2) \
-            and get_track_direction(closest_index) != Direction.LEFT:
-            # if direction_to_align_with_track == Direction.RIGHT and not (steering_angle < 2):
-                print("Unforgivable action. Should turn right. Action is left. %f angle diff, %f steering angle", racing_direction_diff, steering_angle)
-                unforgivable_action = True
+        # if car_direction_relative_to_racing_line == Direction.LEFT and dist > compute_tolerance(track_width) and not (steering_angle < 2) \
+        #     and get_track_direction(closest_index) != Direction.LEFT:
+        #     # if direction_to_align_with_track == Direction.RIGHT and not (steering_angle < 2):
+        #         print("Unforgivable action. Should turn right. Action is left. %f angle diff, %f steering angle", racing_direction_diff, steering_angle)
+        #         unforgivable_action = True
 
-        if car_direction_relative_to_racing_line == Direction.RIGHT and dist > compute_tolerance(track_width) and not (steering_angle > -2) \
-            and get_track_direction(closest_index) != Direction.RIGHT:
-            # if direction_to_align_with_track == Direction.LEFT and not (steering_angle > -2):
-                print("Unforgivable action. Should turn left. Action is right. %f angle diff, %f steering angle", racing_direction_diff, steering_angle)
-                unforgivable_action = True
+        # if car_direction_relative_to_racing_line == Direction.RIGHT and dist > compute_tolerance(track_width) and not (steering_angle > -2) \
+        #     and get_track_direction(closest_index) != Direction.RIGHT:
+        #     # if direction_to_align_with_track == Direction.LEFT and not (steering_angle > -2):
+        #         print("Unforgivable action. Should turn left. Action is right. %f angle diff, %f steering angle", racing_direction_diff, steering_angle)
+        #         unforgivable_action = True
 
         # TODO: The car’s speed is at least 1 m/s greater than its optimal speed while it is making a turn. Essentially the car is turning too fast.
         speed_diff = optimals[2] - speed
