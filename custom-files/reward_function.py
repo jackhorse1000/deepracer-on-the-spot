@@ -9,6 +9,10 @@ class PARAMS:
     prev_direction_diff = None
     prev_normalized_distance_from_route = None
 
+class Direction(Enum):
+    RIGHT = 1
+    LEFT = 2
+    STRAIGHT = 3
 
 class Reward:
     def __init__(self, verbose=True):
