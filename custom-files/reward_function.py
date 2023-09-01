@@ -1,5 +1,5 @@
 import math
-
+from enum import Enum
 
 class PARAMS:
     prev_speed = None
@@ -13,6 +13,12 @@ class Direction(Enum):
     RIGHT = 1
     LEFT = 2
     STRAIGHT = 3
+
+class TrackInfo:
+    MIN_SPEED = 2.2
+    MAX_SPEED = 4
+    STANDARD_TIME = 18
+    FASTEST_TIME = 15
 
 class Reward:
     def __init__(self, verbose=True):
@@ -380,6 +386,26 @@ class Reward:
             self.first_racingpoint_index = closest_index
         print("first_racingpoint_index is set to: ", self.first_racingpoint_index)
 
+        def angle_between_vectors(u, v):
+            dot_product = u[0] * v[0] + u[1] * v[1]
+            determinant = u[0] * v[1] - u[1] * v[0]
+            return math.degrees(math.atan2(determinant, dot_product))
+
+        def track_lookahed_degree_turns(closest_index, lookahead=5):
+            coords = []
+            for i in range(0, lookahead):
+                current_index = (closest_index + i) % len(TrackInfo.racing_track)
+                current_point = TrackInfo.racing_track[current_index]
+                coords.append([current_point[0], current_point[1]])
+            vectors = [(coords[i + 1][0] - coords[i][0], coords[i + 1][1] - coords[i][1]) for i in
+                       range(len(coords) - 1)]
+
+            angles = [angle_between_vectors(vectors[i], vectors[i + 1]) for i in range(len(vectors) - 1)]
+
+            total_angle = sum(angles)
+
+            return total_angle
+
         def get_track_direction(closest_index, lookahead=5):
             degrees_turned = track_lookahed_degree_turns(closest_index, lookahead)
             # print(degrees_turned)
@@ -402,10 +428,10 @@ class Reward:
         # reward += distance_reward * DISTANCE_MULTIPLE
 
         distance_reduction_bonus = 1
-        if PARAMS.prev_normalized_distance_from_route is not None and PARAMS.prev_normalized_distance_from_route > normalized_distance_from_route:
-            if abs(normalized_distance_from_route) > 0:
+        if PARAMS.prev_normalized_distance_from_route is not None and PARAMS.prev_normalized_distance_from_route > dist:
+            if abs(dist) > 0:
                 distance_reduction_bonus = min(
-                    abs(PARAMS.prev_normalized_distance_from_route / normalized_distance_from_route), 2)
+                    abs(PARAMS.prev_normalized_distance_from_route / dist), 2)
 
         distance_reward = distance_reward * distance_reduction_bonus
 
@@ -467,7 +493,7 @@ class Reward:
                 has_steering_angle_changed = True
         steering_angle_maintain_bonus = 1
         # Not changing the steering angle is a good thing if heading in the right direction
-        if is_heading_in_right_direction and not has_steering_angle_changed:
+        if dist < 20 and not has_steering_angle_changed:
             if abs(direction_diff) < 10:
                 steering_angle_maintain_bonus *= 2
             if abs(direction_diff) < 5:
@@ -518,6 +544,7 @@ class Reward:
         PARAMS.prev_steering_angle = steering_angle
         PARAMS.prev_direction_diff = direction_diff
         PARAMS.prev_steps = steps
+        PARAMS.prev_normalized_distance_from_route = dist
 
         ####################### VERBOSE #######################
         if self.verbose == True:
