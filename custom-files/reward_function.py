@@ -29,24 +29,23 @@ class Reward:
             return abs(abs(x1 - x2) ** 2 + abs(y1 - y2) ** 2) ** 0.5
 
         def closest_2_racing_points_index(racing_coords, car_coords):
-            def closest_2_racing_points_index(racing_coords, car_coords):
-                # Calculate all distances to racing points
-                distances = []
-                for i in range(len(racing_coords)):
-                    distance = dist_2_points(x1=racing_coords[i][0], x2=car_coords[0],
-                                             y1=racing_coords[i][1], y2=car_coords[1])
-                    distances.append(distance)
+            # Calculate all distances to racing points
+            distances = []
+            for i in range(len(racing_coords)):
+                distance = dist_2_points(x1=racing_coords[i][0], x2=car_coords[0],
+                                         y1=racing_coords[i][1], y2=car_coords[1])
+                distances.append(distance)
 
-                # Get index of the closest racing point
-                closest_index = distances.index(min(distances))
+            # Get index of the closest racing point
+            closest_index = distances.index(min(distances))
 
-                # Get index of the second closest racing point
-                distances_no_closest = distances.copy()
-                distances_no_closest[closest_index] = 999
-                second_closest_index = distances_no_closest.index(
-                    min(distances_no_closest))
+            # Get index of the second closest racing point
+            distances_no_closest = distances.copy()
+            distances_no_closest[closest_index] = 999
+            second_closest_index = distances_no_closest.index(
+                min(distances_no_closest))
 
-                return [closest_index, second_closest_index]
+            return [closest_index, second_closest_index]
 
         def dist_to_racing_line(closest_coords, second_closest_coords, car_coords):
 
