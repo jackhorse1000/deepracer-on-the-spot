@@ -377,6 +377,16 @@ class Reward:
             self.first_racingpoint_index = closest_index
         print("first_racingpoint_index is set to: ", self.first_racingpoint_index)
 
+        def get_track_direction(closest_index, lookahead=5):
+            degrees_turned = track_lookahed_degree_turns(closest_index, lookahead)
+            # print(degrees_turned)
+            if -1 < degrees_turned < 1:
+                return Direction.STRAIGHT
+            elif degrees_turned > 1:
+                return Direction.RIGHT
+            else:
+                return Direction.LEFT
+
         ################ REWARD AND PUNISHMENT ################
 
         ## Define the default reward ##
@@ -387,6 +397,14 @@ class Reward:
         dist = dist_to_racing_line(optimals[0:2], optimals_second[0:2], [x, y])
         distance_reward = max(1e-3, 1 - (dist / (track_width * 0.5)))
         # reward += distance_reward * DISTANCE_MULTIPLE
+
+        distance_reduction_bonus = 1
+        if PARAMS.prev_normalized_distance_from_route is not None and PARAMS.prev_normalized_distance_from_route > normalized_distance_from_route:
+            if abs(normalized_distance_from_route) > 0:
+                distance_reduction_bonus = min(
+                    abs(PARAMS.prev_normalized_distance_from_route / normalized_distance_from_route), 2)
+
+        distance_reward = distance_reward * distance_reduction_bonus
 
         ## Reward if speed is close to optimal speed ##
         SPEED_DIFF_NO_REWARD = 0.5
@@ -399,6 +417,18 @@ class Reward:
         else:
             speed_reward = 0
         # reward += speed_reward * SPEED_MULTIPLE
+
+        # Check if the speed has dropped
+        has_speed_dropped = False
+        is_turn_upcoming = get_track_direction(closest_index) != Direction.STRAIGHT
+        if PARAMS.prev_speed is not None:
+            if PARAMS.prev_speed > speed:
+                has_speed_dropped = True
+        # Penalize slowing down without good reason on straight portions
+        if has_speed_dropped and not is_turn_upcoming:
+            speed_maintain_bonus = min(speed / PARAMS.prev_speed, 1)
+
+        speed_reward = speed_reward * speed_maintain_bonus
 
         # Reward if less steps
         REWARD_PER_STEP_FOR_FASTEST_TIME = 10
@@ -420,13 +450,33 @@ class Reward:
         if steps <= 5:
             progress_reward = 1  # ignore progress in the first 5 steps
 
+        ################ DIRECTION DIFF ################
+
         # Zero reward if obviously wrong direction (e.g. spin)
         direction_diff = racing_direction_diff(
             optimals[0:2], optimals_second[0:2], [x, y], heading)
 
         direction_diff_reward = 10 * abs(math.cos(direction_diff * math.pi / 20))
 
+        has_steering_angle_changed = False
+        if PARAMS.prev_steering_angle is not None:
+            if not (math.isclose(PARAMS.prev_steering_angle, steering_angle)):
+                has_steering_angle_changed = True
+        steering_angle_maintain_bonus = 1
+        # Not changing the steering angle is a good thing if heading in the right direction
+        if is_heading_in_right_direction and not has_steering_angle_changed:
+            if abs(direction_diff) < 10:
+                steering_angle_maintain_bonus *= 2
+            if abs(direction_diff) < 5:
+                steering_angle_maintain_bonus *= 2
+            if PARAMS.prev_direction_diff is not None and abs(PARAMS.prev_direction_diff) > abs(direction_diff):
+                steering_angle_maintain_bonus *= 2
+
+        direction_diff_reward = direction_diff_reward * steering_angle_maintain_bonus
+
         reward = 10 * ((distance_reward + speed_reward) ** 2) + progress_reward + direction_diff_reward
+
+        ################################
 
         if direction_diff > 20:
             reward = 1e-3
