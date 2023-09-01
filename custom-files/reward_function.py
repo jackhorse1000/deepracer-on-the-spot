@@ -372,7 +372,7 @@ class Reward:
                 has_speed_dropped = True
 
         # Get closest indexes for racing line (and distances to all points on racing line)
-        closest_index, second_closest_index = closest_2_racing_points_index(TrackInfo.racing_track, [x, y])
+        closest_index, second_closest_index = closest_2_racing_points_index(racing_track, [x, y])
 
         # Get optimal [x, y, speed, time] for closest and second closest index
         optimals = racing_track[closest_index]
@@ -394,8 +394,8 @@ class Reward:
         def track_lookahed_degree_turns(closest_index, lookahead=5):
             coords = []
             for i in range(0, lookahead):
-                current_index = (closest_index + i) % len(TrackInfo.racing_track)
-                current_point = TrackInfo.racing_track[current_index]
+                current_index = (closest_index + i) % len(racing_track)
+                current_point = racing_track[current_index]
                 coords.append([current_point[0], current_point[1]])
             vectors = [(coords[i + 1][0] - coords[i][0], coords[i + 1][1] - coords[i][1]) for i in
                        range(len(coords) - 1)]
