@@ -396,8 +396,8 @@ class Reward:
         def track_lookahed_degree_turns(closest_index, lookahead=5):
             coords = []
             for i in range(0, lookahead):
-                current_index = (closest_index + i) % len(TrackInfo.racing_track)
-                current_point = TrackInfo.racing_track[current_index]
+                current_index = (closest_index + i) % len(racing_track)
+                current_point = racing_track[current_index]
                 coords.append([current_point[0], current_point[1]])
             vectors = [(coords[i + 1][0] - coords[i][0], coords[i + 1][1] - coords[i][1]) for i in
                        range(len(coords) - 1)]
