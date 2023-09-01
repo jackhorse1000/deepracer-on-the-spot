@@ -372,7 +372,7 @@ class Reward:
                 has_speed_dropped = True
 
         # Get closest indexes for racing line (and distances to all points on racing line)
-        closest_index, second_closest_index = closest_2_racing_points_index(racing_track, [x, y])
+        closest_index, second_closest_index = closest_2_racing_points_index(TrackInfo.racing_track, [x, y])
 
         # Get optimal [x, y, speed, time] for closest and second closest index
         optimals = racing_track[closest_index]
