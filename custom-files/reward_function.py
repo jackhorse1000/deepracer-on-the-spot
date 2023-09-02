@@ -452,6 +452,7 @@ class Reward:
         # Check if the speed has dropped
         has_speed_dropped = False
         is_turn_upcoming = get_track_direction(closest_index) != Direction.STRAIGHT
+        speed_maintain_bonus = 1
         if PARAMS.prev_speed is not None:
             if PARAMS.prev_speed > speed:
                 has_speed_dropped = True
