@@ -546,12 +546,12 @@ class Reward:
         racing_direction_diff, direction_to_align_with_track = racing_direction_diff(optimals[0:2],
                                                                                      optimals_second[0:2], [x, y],
                                                                                      heading) 
-        abs_heading_reward = 1 - (racing_direction_diff / 180.0)
-        heading_reward = abs_heading_reward
+        # abs_heading_reward = 1 - (racing_direction_diff / 180.0)
+        # heading_reward = abs_heading_reward
         
         # Reward if steering angle is aligned with direction difference
-        abs_steering_reward = 1 - (abs(steering_angle - racing_direction_diff) / 180.0)
-        steering_reward = abs_steering_reward
+        # abs_steering_reward = 1 - (abs(steering_angle - racing_direction_diff) / 180.0)
+        # steering_reward = abs_steering_reward
 
         ################ CURVE SECTION BONUS ################
         # TODO: Reward for following the curve correctly. The sharper the curve the more reward
@@ -667,11 +667,11 @@ class Reward:
         #     print("Unforgivable action. Track goes Left. Action is Right.")
         #     unforgivable_action = True
         
-        def compute_tolerance(track_width, alpha=0.1):
+        def compute_tolerance(track_width, alpha=0.2):
             return alpha * track_width
 
-        car_direction_relative_to_racing_line = position_relative_to_race_line(optimals[0:2], optimals_second[0:2], [x, y], heading)
-        # TODO: The car turns to the right when it should be taking a left turn.
+        # car_direction_relative_to_racing_line = position_relative_to_race_line(optimals[0:2], optimals_second[0:2], [x, y], heading)
+        # # TODO: The car turns to the right when it should be taking a left turn.
         # if car_direction_relative_to_racing_line == Direction.LEFT and dist > compute_tolerance(track_width) and not (steering_angle < 2) \
         #     and get_track_direction(closest_index) != Direction.LEFT:
         #     # if direction_to_align_with_track == Direction.RIGHT and not (steering_angle < 2):
@@ -683,17 +683,22 @@ class Reward:
         #     # if direction_to_align_with_track == Direction.LEFT and not (steering_angle > -2):
         #         print("Unforgivable action. Should turn left. Action is right. %f angle diff, %f steering angle", racing_direction_diff, steering_angle)
         #         unforgivable_action = True
+        
+        # TODO: Add when trying to optimise further
+        # if (closest_waypoints[0] > 144 or closest_waypoints[0] < 15) and speed < 3.5:
+        #     print("Unforgivable action main staight speed < 3.5")
+        #     unforgivable_action = True
 
         # TODO: The car’s speed is at least 1 m/s greater than its optimal speed while it is making a turn. Essentially the car is turning too fast.
         speed_diff = optimals[2] - speed
-        if speed_diff < -0.5 and get_track_direction(closest_index) != Direction.STRAIGHT:
-            print("Unforgivable action speed difference on turn %f < -0.5" % speed_diff)
-            unforgivable_action = True
-        # TODO: The speed of the car is 1.5 m/s slower than its optimal speed on a straight section. Essentially the car is going too slow on straight sections.
+        # if speed_diff < -0.5 and get_track_direction(closest_index) != Direction.STRAIGHT:
+        #     print("Unforgivable action speed difference on turn %f < -0.5" % speed_diff)
+        #     unforgivable_action = True
+        # # TODO: The speed of the car is 1.5 m/s slower than its optimal speed on a straight section. Essentially the car is going too slow on straight sections.
         
-        if speed_diff > 1 and get_track_direction(closest_index) == Direction.STRAIGHT:
-            print("Unforgivable action speed difference on straight %f > 1.0" % speed_diff)
-            unforgivable_action = True
+        # if speed_diff > 1 and get_track_direction(closest_index) == Direction.STRAIGHT:
+        #     print("Unforgivable action speed difference on straight %f > 1.0" % speed_diff)
+        #     unforgivable_action = True
             
         if speed_diff > 1.5:
             print("Unforgivable action speed difference %f > 1.5" % speed_diff)
