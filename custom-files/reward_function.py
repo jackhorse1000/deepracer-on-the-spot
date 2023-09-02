@@ -494,7 +494,7 @@ class Reward:
                 has_steering_angle_changed = True
         steering_angle_maintain_bonus = 1
         # Not changing the steering angle is a good thing if heading in the right direction
-        if dist < 20 and not has_steering_angle_changed:
+        if direction_diff < 20 and not has_steering_angle_changed:
             if abs(direction_diff) < 10:
                 steering_angle_maintain_bonus *= 2
             if abs(direction_diff) < 5:
