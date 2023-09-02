@@ -667,8 +667,8 @@ class Reward:
         #     print("Unforgivable action. Track goes Left. Action is Right.")
         #     unforgivable_action = True
         
-        def compute_tolerance(track_width, alpha=0.2):
-            return alpha * track_width
+        # def compute_tolerance(track_width, alpha=0.2):
+        #     return alpha * track_width
 
         # car_direction_relative_to_racing_line = position_relative_to_race_line(optimals[0:2], optimals_second[0:2], [x, y], heading)
         # # TODO: The car turns to the right when it should be taking a left turn.
