@@ -686,8 +686,8 @@ class Reward:
 
         # TODO: The car’s speed is at least 1 m/s greater than its optimal speed while it is making a turn. Essentially the car is turning too fast.
         speed_diff = optimals[2] - speed
-        if speed_diff < -0.2 and get_track_direction(closest_index) != Direction.STRAIGHT:
-            print("Unforgivable action speed difference on turn %f < -0.2" % speed_diff)
+        if speed_diff < -0.5 and get_track_direction(closest_index) != Direction.STRAIGHT:
+            print("Unforgivable action speed difference on turn %f < -0.5" % speed_diff)
             unforgivable_action = True
         # TODO: The speed of the car is 1.5 m/s slower than its optimal speed on a straight section. Essentially the car is going too slow on straight sections.
         
@@ -700,12 +700,12 @@ class Reward:
             unforgivable_action = True
             
         # Distance from racing line punishment
-        if dist > 0.5 and get_track_direction(closest_index) != Direction.STRAIGHT:
-            print("Unforgivable action distance from racing line on turn %f > 0.5" % dist)
-            unforgivable_action = True
-            
-        if dist > 0.2:
-            print("Unforgivable action distance from racing line on straight %f > 0.2" % dist)
+        # if dist > 0.5 and get_track_direction(closest_index) != Direction.STRAIGHT:
+        #     print("Unforgivable action distance from racing line on turn %f > 0.5" % dist)
+        #     unforgivable_action = True
+
+        if dist > 0.3 and get_track_direction(closest_index) == Direction.STRAIGHT:
+            print("Unforgivable action distance from racing line on straight %f > 0.3" % dist)
             unforgivable_action = True
             
 
@@ -723,8 +723,8 @@ class Reward:
         ################ REWARD ################
         reward += speed_reward * SPEED_MULTIPLE if speed_reward != MINIMAL_REWARD else MINIMAL_REWARD
         reward += distance_reward * DISTANCE_MULTIPLE if distance_reward != MINIMAL_REWARD else MINIMAL_REWARD
-        reward += heading_reward
-        reward += steering_reward
+        # reward += heading_reward
+        # reward += steering_reward
         reward += steps_reward
         
         if unforgivable_action:
@@ -744,8 +744,8 @@ class Reward:
         if self.verbose:
             print("Speed Reward: %f" % (speed_reward * SPEED_MULTIPLE if speed_reward != MINIMAL_REWARD else MINIMAL_REWARD))
             print("Distance Reward: %f" % (distance_reward * DISTANCE_MULTIPLE if distance_reward != MINIMAL_REWARD else MINIMAL_REWARD))
-            print("Heading Reward: %f" % heading_reward)
-            print("Steering Reward: %f" % steering_reward)
+            # print("Heading Reward: %f" % heading_reward)
+            # print("Steering Reward: %f" % steering_reward)
 
             # print("Progress Reward: %f" % progress_reward)
             print("Steps Reward: %f" % steps_reward)
