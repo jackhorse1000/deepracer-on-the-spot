@@ -387,7 +387,7 @@ class Reward:
         distance_reward = max(1e-3, 1 - (dist/(track_width*0.5)))
         # reward += distance_reward * DISTANCE_MULTIPLE
 
-        if(closest_waypoints > 44 and closest_waypoints < 74):
+        if(closest_waypoints[1] > 44 and closest_waypoints[1] < 74):
             SPEED_DIFF_NO_REWARD = 1.15
             DIST_DIFF_NO_REWARD = 0.35
             DIRECTION_DIFF_NO_REWARD = 30.0
