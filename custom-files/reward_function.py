@@ -509,7 +509,7 @@ class Reward:
         # speed_reward = math.exp(-0.5 * abs(speed_diff) ** 2 / sigma_speed ** 2)
 
         SPEED_DIFF_NO_REWARD = 1
-        SPEED_MULTIPLE = 1
+        SPEED_MULTIPLE = 2
         speed_diff = abs(optimals[2]-speed)
         if speed_diff <= SPEED_DIFF_NO_REWARD:
             # we use quadratic punishment (not linear) bc we're not as confident with the optimal speed
@@ -696,22 +696,22 @@ class Reward:
         #     unforgivable_action = True
         # # TODO: The speed of the car is 1.5 m/s slower than its optimal speed on a straight section. Essentially the car is going too slow on straight sections.
         
-        # if speed_diff > 1 and get_track_direction(closest_index) == Direction.STRAIGHT:
-        #     print("Unforgivable action speed difference on straight %f > 1.0" % speed_diff)
-        #     unforgivable_action = True
+        if speed_diff > 1 and get_track_direction(closest_index) == Direction.STRAIGHT:
+            print("Unforgivable action speed difference on straight %f > 1.0" % speed_diff)
+            unforgivable_action = True
             
         if speed_diff > 1.5:
             print("Unforgivable action speed difference %f > 1.5" % speed_diff)
             unforgivable_action = True
             
         # Distance from racing line punishment
-        # if dist > 0.5 and get_track_direction(closest_index) != Direction.STRAIGHT:
-        #     print("Unforgivable action distance from racing line on turn %f > 0.5" % dist)
-        #     unforgivable_action = True
+        if dist > 0.5 and get_track_direction(closest_index) != Direction.STRAIGHT:
+            print("Unforgivable action distance from racing line on turn %f > 0.5" % dist)
+            unforgivable_action = True
 
-        # if dist > 0.3 and get_track_direction(closest_index) == Direction.STRAIGHT:
-        #     print("Unforgivable action distance from racing line on straight %f > 0.3" % dist)
-        #     unforgivable_action = True
+        if dist > 0.3 and get_track_direction(closest_index) == Direction.STRAIGHT:
+            print("Unforgivable action distance from racing line on straight %f > 0.3" % dist)
+            unforgivable_action = True
             
 
         ## Zero reward if off track ##
